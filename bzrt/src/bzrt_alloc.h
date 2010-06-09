@@ -1,5 +1,7 @@
 /**
  * memory allocation primitives for buzzard.
+ * Note that none of these routines will return or set an error value  --
+ * they will either exit or longjmp (throw an exception)
  *
  * $Id: $
  */
@@ -22,6 +24,35 @@ void					bza_dest_stack
 	t_stack * *			a_stack			// a stack to be torn down
 	)
 	;
+
+/** create a new frame on the stack (set reference count to 1) */
+size_t					bza_cons_stk_frame
+	(
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t				frame_sz		// size of frame, including overhead
+	)
+	;
+
+/** reference a frame on the stack (increment reference count) */
+void					bza_ref_stk_frame
+	(
+	t_stack *			a_stack,		// a stack on/in which 
+										// the frame is allocated
+	size_t				stk_frame_off	// offset of stack frame
+	)
+	;
+
+/** de-reference a frame on the stack (decrement reference count) */
+size_t					bza_deref_stk_frame
+	(
+	t_stack *			a_stack,		// a stack on/in which 
+										// the frame is allocated
+	size_t				stk_frame_off	// offset of stack frame
+	)
+	;
+
 
 // vi: ts=4 sw=4 ai
 // *** EOF ***

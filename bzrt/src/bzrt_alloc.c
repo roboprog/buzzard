@@ -29,10 +29,41 @@ void					bza_dest_stack
 	)
 	{
 	// TODO: better error handling
+	assert( a_stack != NULL);
 	assert( *a_stack != NULL);
 
 	free( *a_stack);
 	*a_stack = NULL;
+	}  // _________________________________________________________
+
+/** create a new frame on the stack (set reference count to 1) */
+size_t					bza_cons_stk_frame
+	(
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t				frame_sz		// size of frame, including overhead
+	)
+	{
+	size_t				frame_start;
+
+	// TODO: better error handling
+	assert( a_stack != NULL);
+	assert( *a_stack != NULL);
+
+	frame_start = ( *a_stack)->top;
+
+	( *a_stack)->top += frame_sz;
+	if ( ( *a_stack)->top <= ( *a_stack)->size)
+		{
+		return frame_start;  // === done ===
+		}  // reusing existing space?
+
+	// grow stack
+	*a_stack = realloc( *a_stack, ( *a_stack)->size);
+	assert( *a_stack != NULL);
+
+	return frame_start;
 	}  // _________________________________________________________
 
 
