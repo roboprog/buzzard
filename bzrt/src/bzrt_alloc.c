@@ -66,6 +66,16 @@ size_t					bza_cons_stk_frame
 	return frame_start;
 	}  // _________________________________________________________
 
+/** de-reference a frame on the stack (decrement reference count) */
+void					bza_deref_stk_frame
+	(
+	t_stack *			a_stack,		// a stack on/in which 
+										// the frame is allocated
+	size_t				stk_frame_off	// offset of stack frame
+	)
+	{
+	assert( "TODO: implement this" == NULL);
+	}  // _________________________________________________________
 
 // vi: ts=4 sw=4 ai
 // *** EOF ***

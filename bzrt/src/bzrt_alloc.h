@@ -45,7 +45,7 @@ void					bza_ref_stk_frame
 	;
 
 /** de-reference a frame on the stack (decrement reference count) */
-size_t					bza_deref_stk_frame
+void					bza_deref_stk_frame
 	(
 	t_stack *			a_stack,		// a stack on/in which 
 										// the frame is allocated

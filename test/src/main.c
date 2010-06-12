@@ -41,6 +41,8 @@ void					test_stack_alloc( void)
 
 	tops[ 0 ] = stack->top;
 
+	// throw a few blocks on the stack:
+
 	frames[ 0 ] = bza_cons_stk_frame( &stack, 64);
 	tops[ 1 ] = stack->top;
 	assert( ( tops[ 0 ] + 64) == tops[ 1 ]);
@@ -56,8 +58,16 @@ void					test_stack_alloc( void)
 	assert( ( tops[ 2 ] + 32) == tops[ 3 ]);
 	assert( tops[ 2 ] == frames[ 2 ]);
 
-	// TODO:  play with reference counts and out-of-order release
-	puts( "TODO...");
+	// play with frame release, including out-of-order release
+
+	bza_deref_stk_frame( stack, frames[ 2 ]);
+	assert( stack->top == tops[ 2 ]);
+
+	bza_deref_stk_frame( stack, frames[ 0 ]);
+	assert( stack->top == tops[ 2 ]);  // since frames[ 1 ] is still allocated
+
+	bza_deref_stk_frame( stack, frames[ 1 ]);
+	assert( stack->top == tops[ 0 ]);  // double pop
 
 	bza_dest_stack( &stack);
 	}  // _________________________________________________________
@@ -73,6 +83,7 @@ int						main
 	{
 	test_stack_init();
 	test_stack_alloc();
+	// TODO:  play with reference counts
 	return 0;
 	}  // _________________________________________________________
 
