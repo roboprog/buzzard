@@ -1,6 +1,20 @@
 /**
  * memory allocation primitives for buzzard.
  *
+ * TODO:  idiot needs to decide where to put frame marker,
+ *  and how to track its offset.
+ *
+ * (LOW)
+ *  stack houskeeping fields
+ *  "data":
+ *  	payload 1
+ *  	marker 1
+ *  	payload 2
+ *  	marker 2
+ *  	payload 3
+ *  	marker 3 <- "top"
+ * (HIGH)
+ *
  * $Id: $
  */
 
@@ -8,6 +22,12 @@
 #include <assert.h>
 
 #include "bzrt_alloc.h"
+
+/** stack frame marker */
+typedef struct 			t_frame_marker
+	{
+	size_t				size;			// size of this stack frame
+	}					t_frame_marker;
 
 /** create a new (empty) stack */
 t_stack *				bza_cons_stack( void)
@@ -46,23 +66,26 @@ size_t					bza_cons_stk_frame
 	)
 	{
 	size_t				frame_start;
+	t_frame_marker *	marker;
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
 	assert( *a_stack != NULL);
+	assert( frame_sz >= sizeof( marker) );
 
-	frame_start = ( *a_stack)->top;
+	frame_start = ( *a_stack)->top + sizeof( t_frame_marker);
 
 	( *a_stack)->top += frame_sz;
-	if ( ( *a_stack)->top <= ( *a_stack)->size)
+	if ( ( *a_stack)->top > ( *a_stack)->size)
 		{
-		return frame_start;  // === done ===
-		}  // reusing existing space?
-
-	// grow stack
-	*a_stack = realloc( *a_stack, ( *a_stack)->size);
-	assert( *a_stack != NULL);
-
+		// grow stack
+		*a_stack = realloc( *a_stack, ( *a_stack)->size + sizeof( t_stack) );
+		assert( *a_stack != NULL);
+		}  // new "high water" mark?
+	// else:  use/reuse existing space
+	marker = (t_frame_marker *) &( ( *a_stack)->data[
+			( *a_stack)->top ]);
+	marker->size = frame_sz;
 	return frame_start;
 	}  // _________________________________________________________
 
@@ -74,7 +97,24 @@ void					bza_deref_stk_frame
 	size_t				stk_frame_off	// offset of stack frame
 	)
 	{
-	assert( "TODO: implement this" == NULL);
+	t_frame_marker *	marker;
+
+	// TODO: better error handling
+	assert( a_stack != NULL);
+
+	// TODO: check that count actually went to 0
+
+	// TODO: check that frame is actually on top,
+	//  rather than sandwiched below an active frame
+	assert( stk_frame_off == a_stack->top);
+
+	// at this point, we have a frame with no active references,
+	//  and it is on the top of the stack:
+
+	marker = (t_frame_marker *) &( a_stack->data[ a_stack->top ]);
+	a_stack->top -= ( marker->size);
+
+	// assert( "TODO: implement this" == NULL);
 	}  // _________________________________________________________
 
 // vi: ts=4 sw=4 ai
