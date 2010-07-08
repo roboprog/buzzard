@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 
 #include "bzrt_alloc.h"
@@ -44,20 +45,23 @@ void					test_stack_alloc( void)
 	// throw a few blocks on the stack:
 
 	frames[ 0 ] = bza_cons_stk_frame( &stack, 64);
+	memset( bza_get_frame_ptr( stack, frames[ 0 ]), 'X', 64);
 	tops[ 1 ] = stack->top;
-	assert( ( tops[ 0 ] + 64) == tops[ 1 ]);
+	// assert( ( tops[ 0 ] + 64) <= tops[ 1 ]);
 	assert( ( tops[ 0 ] <= frames[ 0 ]) &&
 			( frames[ 0 ] <= tops[ 1 ]) );
 
 	frames[ 1 ] = bza_cons_stk_frame( &stack, 128);
+	memset( bza_get_frame_ptr( stack, frames[ 1 ]), 'Y', 128);
 	tops[ 2 ] = stack->top;
-	assert( ( tops[ 1 ] + 128) == tops[ 2 ]);
+	// assert( ( tops[ 1 ] + 128) <= tops[ 2 ]);
 	assert( ( tops[ 1 ] <= frames[ 1 ]) &&
 			( frames[ 1 ] <= tops[ 2 ]) );
 
 	frames[ 2 ] = bza_cons_stk_frame( &stack, 32);
+	memset( bza_get_frame_ptr( stack, frames[ 2 ]), 'Z', 32);
 	tops[ 3 ] = stack->top;
-	assert( ( tops[ 2 ] + 32) == tops[ 3 ]);
+	// assert( ( tops[ 2 ] + 32) <= tops[ 3 ]);
 	assert( ( tops[ 2 ] <= frames[ 2 ]) &&
 			( frames[ 2 ] <= tops[ 3 ]) );
 
