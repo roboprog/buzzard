@@ -44,6 +44,7 @@ void					test_stack_alloc( void)
 
 	// throw a few blocks on the stack:
 
+	// puts( "1");  // TEMP
 	frames[ 0 ] = bza_cons_stk_frame( &stack, 64);
 	memset( bza_get_frame_ptr( stack, frames[ 0 ]), 'X', 64);
 	tops[ 1 ] = stack->top;
@@ -51,6 +52,7 @@ void					test_stack_alloc( void)
 	assert( ( tops[ 0 ] <= frames[ 0 ]) &&
 			( frames[ 0 ] <= tops[ 1 ]) );
 
+	// puts( "2");  // TEMP
 	frames[ 1 ] = bza_cons_stk_frame( &stack, 128);
 	memset( bza_get_frame_ptr( stack, frames[ 1 ]), 'Y', 128);
 	tops[ 2 ] = stack->top;
@@ -58,6 +60,8 @@ void					test_stack_alloc( void)
 	assert( ( tops[ 1 ] <= frames[ 1 ]) &&
 			( frames[ 1 ] <= tops[ 2 ]) );
 
+	// puts( "3");  // TEMP
+	// TODO: debug why stack, or underlying heap, is already corrupted here
 	frames[ 2 ] = bza_cons_stk_frame( &stack, 32);
 	memset( bza_get_frame_ptr( stack, frames[ 2 ]), 'Z', 32);
 	tops[ 3 ] = stack->top;
@@ -70,12 +74,16 @@ void					test_stack_alloc( void)
 
 	// play with frame release, including out-of-order release
 
+	// puts( "4");  // TEMP
 	bza_deref_stk_frame( stack, frames[ 2 ]);
 	assert( stack->top == tops[ 2 ]);
 
+	// puts( "5");  // TEMP
+	bza_deref_stk_frame( stack, frames[ 2 ]);
 	bza_deref_stk_frame( stack, frames[ 0 ]);
 	assert( stack->top == tops[ 2 ]);  // since frames[ 1 ] is still allocated
 
+	// puts( "6");  // TEMP
 	bza_deref_stk_frame( stack, frames[ 1 ]);
 	assert( stack->top == tops[ 0 ]);  // double pop
 

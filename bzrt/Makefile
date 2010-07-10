@@ -1,7 +1,7 @@
 # make file for buzzard library
 # $Id: $
 
-CFLAGS = -g
+CFLAGS = -g -Wall
 
 # TODO: .o file list macro
 bin/libbzrt.a: bin/bzrt_alloc.o

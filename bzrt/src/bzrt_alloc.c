@@ -20,6 +20,7 @@
 
 #include <malloc.h>
 #include <assert.h>
+#include <stdio.h>
 
 #include "bzrt_alloc.h"
 
@@ -31,6 +32,70 @@ typedef struct 			t_frame_marker
 	int					ref_cnt;		// reference count
 	size_t				prev_off;		// offset to previous frame
 	}					t_frame_marker;
+
+/** return offset of marker structure for top frame */
+static  // inline?
+size_t					bza_get_top_frame_marker_offset
+	(
+	t_stack *			stack			// a stack to be displayed,
+										//  not null!
+	)
+	{
+	return ( stack->top > sizeof( t_frame_marker) ) ?
+			( stack->top - sizeof( t_frame_marker) ) : 0;
+	}  // _________________________________________________________
+
+/** return marker structure for top frame */
+static  // inline?
+t_frame_marker *		bza_get_top_frame_marker
+	(
+	t_stack *			stack			// a stack to be displayed,
+										//  not null!
+	)
+	{
+	size_t				cur_marker_off;
+
+	cur_marker_off = bza_get_top_frame_marker_offset( stack);
+	if ( cur_marker_off == 0)
+		{
+		return NULL;  // === skip ===
+		}  // empty?
+
+	return (t_frame_marker *) &( stack->data[ cur_marker_off ]);
+	}  // _________________________________________________________
+
+// TODO: macro to enable / disable
+/** dump stack / heap structure */
+static
+void					bza_dump_stack
+	(
+	t_stack *			stack			// a stack to be displayed
+	)
+	{
+	t_frame_marker *	cur_marker;
+
+	if ( stack == NULL)
+		{
+		fprintf( stderr, "No stack!");
+		return;  // === done ===
+		}  // no stack???
+
+	fprintf( stderr, "STK: %d bytes @ %xd\n",
+			(int) stack->size, (int) stack);
+	// TODO: skip when empty
+	cur_marker = bza_get_top_frame_marker( stack);
+	if ( cur_marker == NULL)
+		{
+		return;  // === done ===
+		}  // empty?
+
+	fprintf( stderr, "\tFRM: %d b, %d refs (prev %d) @ %xd\n",
+			(int) cur_marker->size,
+			(int) cur_marker->ref_cnt,
+			(int) cur_marker->prev_off,
+			(int) cur_marker);
+	// TODO: walk down frames...
+	}  // _________________________________________________________
 
 /** create a new (empty) stack */
 t_stack *				bza_cons_stack( void)
@@ -45,6 +110,9 @@ t_stack *				bza_cons_stack( void)
 
 	stack->size = sizeof( t_stack);
 	stack->top = 0;
+	fputs( "STK: construct:\n", stderr);  // TEMP
+	bza_dump_stack( stack);  // TEMP
+	return stack;
 	}  // _________________________________________________________
 
 /** free up a stack (run any needed / practical cleanup) */
@@ -82,15 +150,18 @@ size_t					bza_cons_stk_frame
 	assert( a_stack != NULL);
 	assert( *a_stack != NULL);
 	assert( frame_sz >= 0);
+	fprintf( stderr, "STK: alloc %d\n", (int) frame_sz);  // TEMP
+	bza_dump_stack( *a_stack);  // TEMP
+
+	// TODO:  call (make) stack-walk dumping routine
 
 	// "overname" stuff, let the C optimizer strip out redundancy
 
-	// where is the bookkeeping stuff for the current top:
-	cur_marker_off = ( *a_stack)->top - sizeof( t_frame_marker);
+	// current, before we added something:
+	cur_marker_off = bza_get_top_frame_marker_offset( *a_stack);
 
 	// get the bookkeeping stuff (MIGHT BE RELOCATED!)
-	cur_marker = (t_frame_marker *)
-			&( ( *a_stack)->data[ cur_marker_off ]);
+	cur_marker = bza_get_top_frame_marker( *a_stack);
 
 	// where will bookkeeping for next frame go:
 	next_marker_off = cur_marker->size + ( *a_stack)->top;
@@ -122,6 +193,7 @@ size_t					bza_cons_stk_frame
 	marker->size = frame_sz;
 	marker->ref_cnt = 1;
 	marker->prev_off = cur_marker_off;
+	bza_dump_stack( *a_stack);  // TEMP
 	return next_top;
 	}  // _________________________________________________________
 
