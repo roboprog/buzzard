@@ -46,7 +46,7 @@ void					test_stack_alloc( void)
 
 	// puts( "1");  // TEMP
 	frames[ 0 ] = bza_cons_stk_frame( &stack, 64);
-	memset( bza_get_frame_ptr( stack, frames[ 0 ]), 'X', 64);
+	// TODO: memset( bza_get_frame_ptr( stack, frames[ 0 ]), 'X', 64);
 	tops[ 1 ] = stack->top;
 	// assert( ( tops[ 0 ] + 64) <= tops[ 1 ]);
 	assert( ( tops[ 0 ] <= frames[ 0 ]) &&
@@ -54,7 +54,7 @@ void					test_stack_alloc( void)
 
 	// puts( "2");  // TEMP
 	frames[ 1 ] = bza_cons_stk_frame( &stack, 128);
-	memset( bza_get_frame_ptr( stack, frames[ 1 ]), 'Y', 128);
+	// TODO: memset( bza_get_frame_ptr( stack, frames[ 1 ]), 'Y', 128);
 	tops[ 2 ] = stack->top;
 	// assert( ( tops[ 1 ] + 128) <= tops[ 2 ]);
 	assert( ( tops[ 1 ] <= frames[ 1 ]) &&
@@ -63,7 +63,7 @@ void					test_stack_alloc( void)
 	// puts( "3");  // TEMP
 	// TODO: debug why stack, or underlying heap, is already corrupted here
 	frames[ 2 ] = bza_cons_stk_frame( &stack, 32);
-	memset( bza_get_frame_ptr( stack, frames[ 2 ]), 'Z', 32);
+	// TODO: memset( bza_get_frame_ptr( stack, frames[ 2 ]), 'Z', 32);
 	tops[ 3 ] = stack->top;
 	// assert( ( tops[ 2 ] + 32) <= tops[ 3 ]);
 	assert( ( tops[ 2 ] <= frames[ 2 ]) &&
@@ -79,7 +79,6 @@ void					test_stack_alloc( void)
 	assert( stack->top == tops[ 2 ]);
 
 	// puts( "5");  // TEMP
-	bza_deref_stk_frame( stack, frames[ 2 ]);
 	bza_deref_stk_frame( stack, frames[ 0 ]);
 	assert( stack->top == tops[ 2 ]);  // since frames[ 1 ] is still allocated
 

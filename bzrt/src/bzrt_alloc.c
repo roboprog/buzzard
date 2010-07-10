@@ -93,11 +93,11 @@ void					bza_dump_stack
 
 		{
 		cur_marker = bza_get_frame_marker( stack, marker_off);
-		fprintf( stderr, "\tFRM: %d b, %d refs (prev %d) @ %xd\n",
+		fprintf( stderr, "\tFRM: %d b, %d refs (prev %d) @ %d\n",
 				(int) cur_marker->size,
 				(int) cur_marker->ref_cnt,
 				(int) cur_marker->prev_off,
-				(int) cur_marker);
+				(int) marker_off);
 		}  // dump each frame
 
 	}  // _________________________________________________________
@@ -170,15 +170,14 @@ size_t					bza_cons_stk_frame
 
 	// where will bookkeeping for next frame go:
 	next_marker_off = ( cur_marker != NULL) ?
-			( cur_marker->size + ( *a_stack)->top) :
+			( frame_sz + ( *a_stack)->top) :
 			frame_sz;
 
-	// where will the new payload go:
+	// where will the next payload (on subsequent call) go:
 	next_top = next_marker_off + sizeof( t_frame_marker);
 
 	// how big must stack be to hold new payload + overhead:
-	next_size = next_marker_off + frame_sz +
-			sizeof( t_frame_marker) + sizeof( t_stack);
+	next_size = next_top;
 
 	frame_start = ( *a_stack)->top + sizeof( t_frame_marker);
 
@@ -195,13 +194,12 @@ size_t					bza_cons_stk_frame
 	( *a_stack)->top = next_top;
 	( *a_stack)->size = next_size;
 
-	marker = (t_frame_marker *)
-			&( ( *a_stack)->data[ next_marker_off ]);
+	marker = bza_get_frame_marker( *a_stack, next_marker_off);
 	marker->size = frame_sz;
 	marker->ref_cnt = 1;
 	marker->prev_off = cur_marker_off;  // 0 for first thing added
 	bza_dump_stack( *a_stack);  // TEMP
-	return next_top;
+	return next_marker_off;
 	}  // _________________________________________________________
 
 /** de-reference a frame on the stack (decrement reference count) */
@@ -216,20 +214,25 @@ void					bza_deref_stk_frame
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
+	fprintf( stderr, "*** STK: deref frame off %d\n", (int) stk_frame_off);  // TEMP
+	bza_dump_stack( a_stack);  // TEMP
 
 	// TODO: check that count actually went to 0
 
 	// TODO: check that frame is actually on top,
 	//  rather than sandwiched below an active frame
-	assert( stk_frame_off == a_stack->top);
+	// assert( stk_frame_off == a_stack->top);
 
 	// at this point, we have a frame with no active references,
 	//  and it is on the top of the stack:
 
-	marker = (t_frame_marker *) &( a_stack->data[ a_stack->top ]);
-	a_stack->top -= ( marker->size);
+	marker = bza_get_frame_marker( a_stack, stk_frame_off);
+	assert( marker->ref_cnt > 0);
+	( marker->ref_cnt)--;
+	// a_stack->top -= ( marker->size);
 
 	// assert( "TODO: implement this" == NULL);
+	bza_dump_stack( a_stack);  // TEMP
 	}  // _________________________________________________________
 
 /**
@@ -244,24 +247,20 @@ void *					bza_get_frame_ptr
 	size_t				stk_frame_off	// offset of stack frame
 	)
 	{
-	size_t				cur_marker_off;
 	t_frame_marker *	cur_marker;
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
 	assert( a_stack->top >= stk_frame_off);
 
-	// where is the bookkeeping stuff for the current top:
-	cur_marker_off = stk_frame_off - sizeof( t_frame_marker);
-
 	// get the bookkeeping stuff
-	cur_marker = (t_frame_marker *)
-			&( a_stack->data[ cur_marker_off ]);
+	cur_marker = bza_get_frame_marker( a_stack, stk_frame_off);
 
 	// TODO: better error handling
 	assert( cur_marker->ref_cnt > 0);
 
-	return (void *) &( a_stack->data[ stk_frame_off ]);
+	return (void *) &( a_stack->data[
+			stk_frame_off - cur_marker->size ]);
 	}  // _________________________________________________________
 
 
