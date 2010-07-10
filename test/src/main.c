@@ -96,6 +96,7 @@ void					test_stack_alloc( void)
  */
 int						main
 	(
+	int					argc,
 	char *				argv []
 	)
 	{

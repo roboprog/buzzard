@@ -6,12 +6,13 @@
  *
  *  "data":
  * (HIGH)
- *  	payload 3 <- "top"
+ *  	<- "top"
  *  	marker 3
- *  	payload 2
+ *  	payload 3
  *  	marker 2
- *  	payload 1
+ *  	payload 2
  *  	marker 1
+ *  	payload 1
  * (LOW)
  *  stack houskeeping fields
  *
@@ -37,31 +38,34 @@ typedef struct 			t_frame_marker
 static  // inline?
 size_t					bza_get_top_frame_marker_offset
 	(
-	t_stack *			stack			// a stack to be displayed,
+	t_stack *			stack			// a stack to be accessed,
 										//  not null!
 	)
 	{
+	// the frame marker is just underneathh the stack top, unless empty
 	return ( stack->top > sizeof( t_frame_marker) ) ?
 			( stack->top - sizeof( t_frame_marker) ) : 0;
 	}  // _________________________________________________________
 
-/** return marker structure for top frame */
+/**
+ * Return marker structure for indicated frame.
+ *  WARNING:  this is a volatile value,
+ *  which will often be invalidated by a stack resize.
+ */
 static  // inline?
-t_frame_marker *		bza_get_top_frame_marker
+t_frame_marker *		bza_get_frame_marker
 	(
-	t_stack *			stack			// a stack to be displayed,
+	t_stack *			stack,			// a stack to be displayed,
 										//  not null!
+	size_t				marker_off		// offset to desired frame marker
 	)
 	{
-	size_t				cur_marker_off;
-
-	cur_marker_off = bza_get_top_frame_marker_offset( stack);
-	if ( cur_marker_off == 0)
+	if ( marker_off == 0)
 		{
 		return NULL;  // === skip ===
 		}  // empty?
 
-	return (t_frame_marker *) &( stack->data[ cur_marker_off ]);
+	return (t_frame_marker *) &( stack->data[ marker_off ]);
 	}  // _________________________________________________________
 
 // TODO: macro to enable / disable
@@ -72,6 +76,7 @@ void					bza_dump_stack
 	t_stack *			stack			// a stack to be displayed
 	)
 	{
+	size_t				marker_off;
 	t_frame_marker *	cur_marker;
 
 	if ( stack == NULL)
@@ -82,19 +87,19 @@ void					bza_dump_stack
 
 	fprintf( stderr, "STK: %d bytes @ %xd\n",
 			(int) stack->size, (int) stack);
-	// TODO: skip when empty
-	cur_marker = bza_get_top_frame_marker( stack);
-	if ( cur_marker == NULL)
-		{
-		return;  // === done ===
-		}  // empty?
+	for ( marker_off = bza_get_top_frame_marker_offset( stack);
+		  marker_off != 0;
+		  marker_off = cur_marker->prev_off)
 
-	fprintf( stderr, "\tFRM: %d b, %d refs (prev %d) @ %xd\n",
-			(int) cur_marker->size,
-			(int) cur_marker->ref_cnt,
-			(int) cur_marker->prev_off,
-			(int) cur_marker);
-	// TODO: walk down frames...
+		{
+		cur_marker = bza_get_frame_marker( stack, marker_off);
+		fprintf( stderr, "\tFRM: %d b, %d refs (prev %d) @ %xd\n",
+				(int) cur_marker->size,
+				(int) cur_marker->ref_cnt,
+				(int) cur_marker->prev_off,
+				(int) cur_marker);
+		}  // dump each frame
+
 	}  // _________________________________________________________
 
 /** create a new (empty) stack */
@@ -110,7 +115,7 @@ t_stack *				bza_cons_stack( void)
 
 	stack->size = sizeof( t_stack);
 	stack->top = 0;
-	fputs( "STK: construct:\n", stderr);  // TEMP
+	fputs( "*** STK: construct:\n", stderr);  // TEMP
 	bza_dump_stack( stack);  // TEMP
 	return stack;
 	}  // _________________________________________________________
@@ -150,7 +155,7 @@ size_t					bza_cons_stk_frame
 	assert( a_stack != NULL);
 	assert( *a_stack != NULL);
 	assert( frame_sz >= 0);
-	fprintf( stderr, "STK: alloc %d\n", (int) frame_sz);  // TEMP
+	fprintf( stderr, "*** STK: alloc %d\n", (int) frame_sz);  // TEMP
 	bza_dump_stack( *a_stack);  // TEMP
 
 	// TODO:  call (make) stack-walk dumping routine
@@ -161,10 +166,12 @@ size_t					bza_cons_stk_frame
 	cur_marker_off = bza_get_top_frame_marker_offset( *a_stack);
 
 	// get the bookkeeping stuff (MIGHT BE RELOCATED!)
-	cur_marker = bza_get_top_frame_marker( *a_stack);
+	cur_marker = bza_get_frame_marker( *a_stack, cur_marker_off);
 
 	// where will bookkeeping for next frame go:
-	next_marker_off = cur_marker->size + ( *a_stack)->top;
+	next_marker_off = ( cur_marker != NULL) ?
+			( cur_marker->size + ( *a_stack)->top) :
+			frame_sz;
 
 	// where will the new payload go:
 	next_top = next_marker_off + sizeof( t_frame_marker);
@@ -192,7 +199,7 @@ size_t					bza_cons_stk_frame
 			&( ( *a_stack)->data[ next_marker_off ]);
 	marker->size = frame_sz;
 	marker->ref_cnt = 1;
-	marker->prev_off = cur_marker_off;
+	marker->prev_off = cur_marker_off;  // 0 for first thing added
 	bza_dump_stack( *a_stack);  // TEMP
 	return next_top;
 	}  // _________________________________________________________
