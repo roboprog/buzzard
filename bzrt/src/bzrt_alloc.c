@@ -31,6 +31,7 @@ typedef struct 			t_frame_marker
 	size_t				size;			// size of this stack frame,
 										//  usable space, excluding overhead
 	int					ref_cnt;		// reference count
+	// TODO: remove redundant field (size vs prev offset)
 	size_t				prev_off;		// offset to previous frame
 	}					t_frame_marker;
 
@@ -211,27 +212,45 @@ void					bza_deref_stk_frame
 	)
 	{
 	t_frame_marker *	marker;
+	size_t				marker_off;
+	t_frame_marker *	cur_marker;
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
 	fprintf( stderr, "*** STK: deref frame off %d\n", (int) stk_frame_off);  // TEMP
 	bza_dump_stack( a_stack);  // TEMP
 
-	// TODO: check that count actually went to 0
-
-	// TODO: check that frame is actually on top,
-	//  rather than sandwiched below an active frame
-	// assert( stk_frame_off == a_stack->top);
-
-	// at this point, we have a frame with no active references,
-	//  and it is on the top of the stack:
-
+	// decrement count
 	marker = bza_get_frame_marker( a_stack, stk_frame_off);
 	assert( marker->ref_cnt > 0);
 	( marker->ref_cnt)--;
-	// a_stack->top -= ( marker->size);
+	if ( marker->ref_cnt > 0)
+		{
+		return;  // === done ===
+		}  // frame still in use?
 
-	// assert( "TODO: implement this" == NULL);
+	if ( stk_frame_off != bza_get_top_frame_marker_offset( a_stack) )
+		{
+		return;  // === done ===
+		}  // frame not top-most?
+
+	// so, the top frame has no remaining references, pop all we can:
+
+	for ( marker_off = bza_get_top_frame_marker_offset( a_stack);
+		  marker_off != 0;
+		  marker_off = cur_marker->prev_off)
+
+		{
+		cur_marker = bza_get_frame_marker( a_stack, marker_off);
+		if ( cur_marker->ref_cnt > 0)
+			{
+			break;  // === done ===
+			}  // still in use?
+
+		// discard *this* frame
+		a_stack->top = cur_marker->prev_off + sizeof( t_frame_marker);
+		}  // walk down each frame
+
 	bza_dump_stack( a_stack);  // TEMP
 	}  // _________________________________________________________
 
