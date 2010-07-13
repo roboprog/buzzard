@@ -248,7 +248,8 @@ void					bza_deref_stk_frame
 			}  // still in use?
 
 		// discard *this* frame
-		a_stack->top = cur_marker->prev_off + sizeof( t_frame_marker);
+		a_stack->top = ( cur_marker->prev_off > 0) ?
+			( cur_marker->prev_off + sizeof( t_frame_marker) ) : 0;
 		}  // walk down each frame
 
 	bza_dump_stack( a_stack);  // TEMP
