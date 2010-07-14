@@ -17,7 +17,7 @@ void					test_stack_init( void)
 	{
 	t_stack *			stack;
 
-	puts( "Test basic stack creation");
+	puts( "Test basic stack creation"); fflush( stdout);
 
 	stack = bza_cons_stack();
 	assert( stack != NULL);
@@ -36,7 +36,7 @@ void					test_stack_alloc( void)
 	size_t 				frames[ 3 ];
 	size_t 				tops[ 4 ];
 
-	puts( "Test basic stack frame allocation and deallocation");
+	puts( "Test basic stack frame allocation and deallocation"); fflush( stdout);
 
 	stack = bza_cons_stack();
 
@@ -46,7 +46,7 @@ void					test_stack_alloc( void)
 
 	// puts( "1");  // TEMP
 	frames[ 0 ] = bza_cons_stk_frame( &stack, 64);
-	// TODO: memset( bza_get_frame_ptr( stack, frames[ 0 ]), 'X', 64);
+	memset( bza_get_frame_ptr( stack, frames[ 0 ]), 'X', 64);
 	tops[ 1 ] = stack->top;
 	// assert( ( tops[ 0 ] + 64) <= tops[ 1 ]);
 	assert( ( tops[ 0 ] <= frames[ 0 ]) &&
@@ -54,16 +54,15 @@ void					test_stack_alloc( void)
 
 	// puts( "2");  // TEMP
 	frames[ 1 ] = bza_cons_stk_frame( &stack, 128);
-	// TODO: memset( bza_get_frame_ptr( stack, frames[ 1 ]), 'Y', 128);
+	memset( bza_get_frame_ptr( stack, frames[ 1 ]), 'Y', 128);
 	tops[ 2 ] = stack->top;
 	// assert( ( tops[ 1 ] + 128) <= tops[ 2 ]);
 	assert( ( tops[ 1 ] <= frames[ 1 ]) &&
 			( frames[ 1 ] <= tops[ 2 ]) );
 
 	// puts( "3");  // TEMP
-	// TODO: debug why stack, or underlying heap, is already corrupted here
 	frames[ 2 ] = bza_cons_stk_frame( &stack, 32);
-	// TODO: memset( bza_get_frame_ptr( stack, frames[ 2 ]), 'Z', 32);
+	memset( bza_get_frame_ptr( stack, frames[ 2 ]), 'Z', 32);
 	tops[ 3 ] = stack->top;
 	// assert( ( tops[ 2 ] + 32) <= tops[ 3 ]);
 	assert( ( tops[ 2 ] <= frames[ 2 ]) &&

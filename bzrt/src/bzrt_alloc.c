@@ -86,7 +86,7 @@ void					bza_dump_stack
 		return;  // === done ===
 		}  // no stack???
 
-	fprintf( stderr, "STK: %d bytes @ %xd\n",
+	fprintf( stderr, "STK: %d bytes @ %x\n",
 			(int) stack->size, (int) stack);
 	for ( marker_off = bza_get_top_frame_marker_offset( stack);
 		  marker_off != 0;
@@ -151,6 +151,8 @@ size_t					bza_cons_stk_frame
 	size_t				next_size;
 	size_t				frame_start;
 	t_frame_marker *	marker;
+	void *				ptr;
+	size_t				sz;
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
@@ -187,8 +189,12 @@ size_t					bza_cons_stk_frame
 		// TODO: minimize allocation calls
 		// TODO: determine if alloc is thread safe
 		// grow stack
-		*a_stack = realloc( *a_stack, ( *a_stack)->size + sizeof( t_stack) );
-		assert( *a_stack != NULL);
+		// (more excess debug visibility vars)
+		ptr = *a_stack;
+		sz = next_size + sizeof( t_stack);
+		ptr = realloc( ptr, sz);
+		*a_stack = ptr;
+		assert( *a_stack != NULL);  // TODO: better error check
 		}  // new "high water" mark?
 	// else:  use/reuse existing space
 
@@ -268,19 +274,30 @@ void *					bza_get_frame_ptr
 	)
 	{
 	t_frame_marker *	cur_marker;
+	int					data_off;
+
+	fprintf( stderr, "*** STK: ptr for frame off %d\n", (int) stk_frame_off);  // TEMP
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
-	assert( a_stack->top >= stk_frame_off);
+	assert( ( 0 < stk_frame_off) && ( stk_frame_off < a_stack->top) );
 
 	// get the bookkeeping stuff
 	cur_marker = bza_get_frame_marker( a_stack, stk_frame_off);
+	fprintf( stderr, "\tFRM: %d b, %d refs (prev %d) @ %d\n",  // TEMP
+			(int) cur_marker->size,
+			(int) cur_marker->ref_cnt,
+			(int) cur_marker->prev_off,
+			(int) stk_frame_off);
 
 	// TODO: better error handling
 	assert( cur_marker->ref_cnt > 0);
 
-	return (void *) &( a_stack->data[
-			stk_frame_off - cur_marker->size ]);
+	// use *signed* arithmetic for offset:
+	data_off = ( (int) stk_frame_off) - ( (int) cur_marker->size);
+	fprintf( stderr, "\tDATA @ %d\n", data_off);  // TEMP
+	fflush( stderr);  // TODO: make flushing debug log routines
+	return (void *) &( a_stack->data[ data_off ]);
 	}  // _________________________________________________________
 
 
