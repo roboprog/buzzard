@@ -1,9 +1,7 @@
 /**
  * memory allocation primitives for buzzard.
  *
- * TODO:  idiot needs to decide where to put frame marker,
- *  and how to track its offset.
- *
+ * Memory layout within a "stack" (not strictly used as a stack):
  *  "data":
  * (HIGH)
  *  	<- "top"
@@ -24,6 +22,19 @@
 #include <stdio.h>
 
 #include "bzrt_alloc.h"
+
+#define DO_LOG	1
+
+#ifdef DO_LOG
+	#define MLOG_PUTS( s) fputs( (s), stderr)
+
+	// TODO: something a bit more clever (var-arg macro?)
+	#define MLOG_PRINTF	fprintf
+#else
+	#define MLOG_PUTS( s) /* */
+
+	#define MLOG_PRINTF	//
+#endif  // DO_LOG defined?
 
 /** stack frame marker */
 typedef struct 			t_frame_marker
@@ -82,11 +93,11 @@ void					bza_dump_stack
 
 	if ( stack == NULL)
 		{
-		fprintf( stderr, "No stack!");
+		MLOG_PRINTF( stderr, "No stack!");
 		return;  // === done ===
 		}  // no stack???
 
-	fprintf( stderr, "STK: %d bytes @ %x\n",
+	MLOG_PRINTF( stderr, "STK: %d bytes @ %x\n",
 			(int) stack->size, (int) stack);
 	for ( marker_off = bza_get_top_frame_marker_offset( stack);
 		  marker_off != 0;
@@ -94,7 +105,7 @@ void					bza_dump_stack
 
 		{
 		cur_marker = bza_get_frame_marker( stack, marker_off);
-		fprintf( stderr, "\tFRM: %d b, %d refs (prev %d) @ %d\n",
+		MLOG_PRINTF( stderr, "\tFRM: %d b, %d refs (prev %d) @ %d\n",
 				(int) cur_marker->size,
 				(int) cur_marker->ref_cnt,
 				(int) cur_marker->prev_off,
@@ -116,7 +127,7 @@ t_stack *				bza_cons_stack( void)
 
 	stack->size = sizeof( t_stack);
 	stack->top = 0;
-	fputs( "*** STK: construct:\n", stderr);  // TEMP
+	MLOG_PUTS( "*** STK: construct:\n");
 	bza_dump_stack( stack);  // TEMP
 	return stack;
 	}  // _________________________________________________________
@@ -158,7 +169,7 @@ size_t					bza_cons_stk_frame
 	assert( a_stack != NULL);
 	assert( *a_stack != NULL);
 	assert( frame_sz >= 0);
-	fprintf( stderr, "*** STK: alloc %d\n", (int) frame_sz);  // TEMP
+	MLOG_PRINTF( stderr, "*** STK: alloc %d\n", (int) frame_sz);  // TEMP
 	bza_dump_stack( *a_stack);  // TEMP
 
 	// TODO:  call (make) stack-walk dumping routine
@@ -223,7 +234,7 @@ void					bza_deref_stk_frame
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
-	fprintf( stderr, "*** STK: deref frame off %d\n", (int) stk_frame_off);  // TEMP
+	MLOG_PRINTF( stderr, "*** STK: deref frame off %d\n", (int) stk_frame_off);  // TEMP
 	bza_dump_stack( a_stack);  // TEMP
 
 	// decrement count
@@ -276,7 +287,7 @@ void *					bza_get_frame_ptr
 	t_frame_marker *	cur_marker;
 	int					data_off;
 
-	fprintf( stderr, "*** STK: ptr for frame off %d\n", (int) stk_frame_off);  // TEMP
+	MLOG_PRINTF( stderr, "*** STK: ptr for frame off %d\n", (int) stk_frame_off);  // TEMP
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
@@ -284,7 +295,7 @@ void *					bza_get_frame_ptr
 
 	// get the bookkeeping stuff
 	cur_marker = bza_get_frame_marker( a_stack, stk_frame_off);
-	fprintf( stderr, "\tFRM: %d b, %d refs (prev %d) @ %d\n",  // TEMP
+	MLOG_PRINTF( stderr, "\tFRM: %d b, %d refs (prev %d) @ %d\n",  // TEMP
 			(int) cur_marker->size,
 			(int) cur_marker->ref_cnt,
 			(int) cur_marker->prev_off,
@@ -295,7 +306,7 @@ void *					bza_get_frame_ptr
 
 	// use *signed* arithmetic for offset:
 	data_off = ( (int) stk_frame_off) - ( (int) cur_marker->size);
-	fprintf( stderr, "\tDATA @ %d\n", data_off);  // TEMP
+	MLOG_PRINTF( stderr, "\tDATA @ %d\n", data_off);  // TEMP
 	fflush( stderr);  // TODO: make flushing debug log routines
 	return (void *) &( a_stack->data[ data_off ]);
 	}  // _________________________________________________________
