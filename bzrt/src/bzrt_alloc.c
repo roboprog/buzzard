@@ -220,6 +220,33 @@ size_t					bza_cons_stk_frame
 	return next_marker_off;
 	}  // _________________________________________________________
 
+/** reference a frame on the stack (increment reference count) */
+void					bza_ref_stk_frame
+	(
+	t_stack *			a_stack,		// a stack on/in which 
+										// the frame is allocated
+	size_t				stk_frame_off	// offset of stack frame
+	)
+	{
+	t_frame_marker *	marker;
+	size_t				marker_off;
+	t_frame_marker *	cur_marker;
+
+	// TODO: better error handling
+	assert( a_stack != NULL);
+	MLOG_PRINTF( stderr, "*** STK: ref frame off %d\n", (int) stk_frame_off);  // TEMP
+	bza_dump_stack( a_stack);  // TEMP
+
+	// increment count
+	marker = bza_get_frame_marker( a_stack, stk_frame_off);
+	assert( marker->ref_cnt > 0);
+	( marker->ref_cnt)++;
+
+	// TODO: check for counter overflow?
+
+	bza_dump_stack( a_stack);  // TEMP
+	}  // _________________________________________________________
+
 /** de-reference a frame on the stack (decrement reference count) */
 void					bza_deref_stk_frame
 	(

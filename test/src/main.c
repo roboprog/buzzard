@@ -68,21 +68,21 @@ void					test_stack_alloc( void)
 	assert( ( tops[ 2 ] <= frames[ 2 ]) &&
 			( frames[ 2 ] <= tops[ 3 ]) );
 
-	// TODO:  specify amount of "useful" space allocation,
-	//  *not* including overhead
-
 	// play with frame release, including out-of-order release
+	bza_ref_stk_frame( stack, frames[ 1 ]);  // extra count on frame 1!
 
 	// puts( "4");  // TEMP
 	bza_deref_stk_frame( stack, frames[ 2 ]);
 	assert( stack->top == tops[ 2 ]);
 
 	// puts( "5");  // TEMP
-	bza_deref_stk_frame( stack, frames[ 0 ]);
+	bza_deref_stk_frame( stack, frames[ 1 ]);
 	assert( stack->top == tops[ 2 ]);  // since frames[ 1 ] is still allocated
 
 	// puts( "6");  // TEMP
-	bza_deref_stk_frame( stack, frames[ 1 ]);
+	bza_deref_stk_frame( stack, frames[ 0 ]);
+	assert( stack->top == tops[ 2 ]);  // since frames[ 1 ] is still allocated
+	bza_deref_stk_frame( stack, frames[ 1 ]);  // get rid of "extra" count
 	assert( stack->top == tops[ 0 ]);  // double pop
 
 	bza_dest_stack( &stack);
@@ -101,6 +101,7 @@ int						main
 	test_stack_init();
 	test_stack_alloc();
 	// TODO:  play with reference counts
+	// TODO:  play with out of memory error handling
 	return 0;
 	}  // _________________________________________________________
 
