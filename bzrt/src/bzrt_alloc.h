@@ -20,6 +20,14 @@ typedef struct 			t_stack
 t_stack *				bza_cons_stack( void)
 	;
 
+/** create a new (empty) stack, with "real time" support options */
+t_stack *				bza_cons_stack_rt
+	(
+	size_t				initial_size,	// initial size of stack
+	int					is_fixed		// true if fixed to "initial" size
+	)
+	;
+
 /** free up a stack (run any needed / practical cleanup) */
 void					bza_dest_stack
 	(

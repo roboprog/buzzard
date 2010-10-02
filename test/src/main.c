@@ -38,7 +38,7 @@ void					test_stack_init( void)
 	{
 	t_stack *			stack;
 
-	puts( "Test basic stack creation"); fflush( stdout);
+	puts( "\nTest basic stack creation"); fflush( stdout);
 
 	stack = bza_cons_stack();
 	assert( stack != NULL);
@@ -57,7 +57,7 @@ void					test_stack_alloc( void)
 	size_t 				frames[ 3 ];
 	size_t 				tops[ 4 ];
 
-	puts( "Test basic stack frame allocation and deallocation"); fflush( stdout);
+	puts( "\nTest basic stack frame allocation and deallocation"); fflush( stdout);
 
 	stack = bza_cons_stack();
 
@@ -110,6 +110,56 @@ void					test_stack_alloc( void)
 	}  // _________________________________________________________
 
 /**
+ * Test "real time" stack frame allocation and deallocation.
+ *  "Real time" means that sub-allocations will run in deterministic time,
+ *  but of course we have no control over external OS scheduling.
+ */
+static
+void					test_rt_stack_alloc( void)
+	{
+	const
+	size_t				K256 = ( 1 << 18);
+	const
+	char *				datums = "XYZ";
+
+	t_stack *			stack;
+	size_t 				frames[ 3 ];
+	char *				data[ 3 ];
+	int					idx;
+
+	puts( "\nTest real-time support frame allocation and deallocation"); fflush( stdout);
+
+	stack = bza_cons_stack_rt( ( 1 << 20), 1);  // 1 MB
+
+	// allocation and deallocation
+
+	for ( idx = 0; idx < 3; idx++)
+
+		{
+		frames[ idx ] = bza_cons_stk_frame( &stack, K256);
+		data[ idx ] = bza_get_frame_ptr( stack, frames[ idx ]);
+		memset( data[ idx ], datums[ idx ], K256);
+		}  // allocate and init each chunk
+
+	for ( idx = 0; idx < 3; idx++)
+
+		{
+		assert( data[ idx ][ 0 ] == datums[ idx ]);
+		assert( data[ idx ][ K256 - 1 ] == datums[ idx ]);
+		}  // test content of each block
+
+	bza_deref_stk_frame( stack, frames[ 2 ]);
+	bza_deref_stk_frame( stack, frames[ 1 ]);
+	bza_deref_stk_frame( stack, frames[ 0 ]);
+
+	// TODO:  overallocate, test error handling
+
+	// TODO: take timings, figure how to test acceptability
+
+	bza_dest_stack( &stack);
+	}  // _________________________________________________________
+
+/**
  * Drive tests.
  * TODO: xunit or something like that (but exit-on-failure for now)
  */
@@ -121,7 +171,7 @@ int						main
 	{
 	test_stack_init();
 	test_stack_alloc();
-	// TODO:  play with reference counts
+	test_rt_stack_alloc();
 	// TODO:  play with out of memory error handling
 	return 0;
 	}  // _________________________________________________________

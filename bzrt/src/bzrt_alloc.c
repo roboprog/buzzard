@@ -138,17 +138,35 @@ void					bza_dump_stack
 /** create a new (empty) stack */
 t_stack *				bza_cons_stack( void)
 	{
-	t_stack *			stack;
+	bza_cons_stack_rt( 0, 0);
+	}  // _________________________________________________________
 
-	stack = malloc( sizeof( t_stack) );
+/** create a new (empty) stack, with "real time" support options */
+t_stack *				bza_cons_stack_rt
+	(
+	size_t				initial_size,	// initial size of stack
+	int					is_fixed		// true if fixed to "initial" size
+	)
+	{
+	size_t				stk_sz;
+	t_stack *			stack;
+	const char *		fx;
+
+	stk_sz = ( initial_size > sizeof( t_stack) ) ?
+			initial_size : sizeof( t_stack);
+	stack = malloc( stk_sz);
 	// TODO: better error handling
 	assert( stack != NULL);
 
 	// TODO: define boundary better, so I can recognize an empty stack
 
-	stack->size = sizeof( t_stack);
+	stack->size = stk_sz;
 	stack->top = 0;
-	MLOG_PUTS( "*** STK: construct:\n");
+
+	// TODO:  define reallocation callback func ptr (based on is_fixed)
+
+	fx = is_fixed ? "fix" : "init";
+	MLOG_PRINTF( stderr, "*** STK: construct (%d b %s):\n", (int) stk_sz, fx);  // TEMP
 	bza_dump_stack( stack);  // TEMP
 	return stack;
 	}  // _________________________________________________________
