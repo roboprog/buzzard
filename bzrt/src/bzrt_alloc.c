@@ -144,6 +144,37 @@ t_stack *				bza_cons_stack
 	bza_cons_stack_rt( catcher, 0, 0);
 	}  // _________________________________________________________
 
+/**
+ * allocate the requested amount of memory,
+ * possibly resizing an existing block
+ * TODO:  set policy for releasing existing block if realloc fails.
+ */
+static
+void *					alloc_or_die
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	void *				existing,		// existing block (if not null)
+	size_t				new_size		// number of bytes requested
+	)
+	{
+	void *				new_blk;
+
+	// TODO: determine if alloc is thread safe
+	new_blk = realloc( existing, new_size);
+	if ( new_blk != NULL)
+		{
+		return new_blk;  // === done ===
+		}  // it worked?
+
+	if ( catcher != NULL)
+		{
+		longjmp( *catcher, 1);  // === abort ===
+		}  // error handler?
+
+	// just die, then
+	assert( new_blk != NULL);
+	}  // _________________________________________________________
+
 /** create a new (empty) stack, with "real time" support options */
 t_stack *				bza_cons_stack_rt
 	(
@@ -158,9 +189,7 @@ t_stack *				bza_cons_stack_rt
 
 	stk_sz = ( initial_size > sizeof( t_stack) ) ?
 			initial_size : sizeof( t_stack);
-	stack = malloc( stk_sz);
-	// TODO: better error handling
-	assert( stack != NULL);
+	stack = alloc_or_die( catcher, NULL, stk_sz);
 
 	// TODO: define boundary better, so I can recognize an empty stack
 
@@ -243,14 +272,12 @@ size_t					bza_cons_stk_frame
 	if ( next_size > ( *a_stack)->size)
 		{
 		// TODO: minimize allocation calls
-		// TODO: determine if alloc is thread safe
 		// grow stack
 		// (more excess debug visibility vars)
 		ptr = *a_stack;
 		sz = next_size + sizeof( t_stack);
-		ptr = realloc( ptr, sz);
+		ptr = alloc_or_die( catcher, ptr, sz);
 		*a_stack = ptr;
-		assert( *a_stack != NULL);  // TODO: better error check
 		}  // new "high water" mark?
 	// else:  use/reuse existing space
 
