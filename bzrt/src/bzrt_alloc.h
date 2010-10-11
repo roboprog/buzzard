@@ -10,6 +10,8 @@
 
 #include <setjmp.h>
 
+// TODO:  define allocation handler here, put ptr in t_stack
+
 /** stub of a stack instance -- allocation is within a stack */
 typedef struct 			t_stack
 	{

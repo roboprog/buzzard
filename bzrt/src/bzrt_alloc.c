@@ -67,6 +67,15 @@ typedef struct 			t_frame_marker
 	size_t				prev_off;		// offset to previous frame
 	}					t_frame_marker;
 
+typedef
+void *					( * tf_allocator)
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	void *				existing,		// existing block (if not null)
+	size_t				new_size		// number of bytes requested
+	)
+	;
+
 /** return offset of marker structure for top frame */
 static  // inline?
 size_t					bza_get_top_frame_marker_offset
@@ -141,7 +150,7 @@ t_stack *				bza_cons_stack
 	jmp_buf *			catcher			// error handler (or null for immediate death)
 	)
 	{
-	bza_cons_stack_rt( catcher, 0, 0);
+	return bza_cons_stack_rt( catcher, 0, 0);
 	}  // _________________________________________________________
 
 /**
@@ -173,6 +182,7 @@ void *					alloc_or_die
 
 	// just die, then
 	assert( new_blk != NULL);
+	return NULL;  // dummy
 	}  // _________________________________________________________
 
 /** create a new (empty) stack, with "real time" support options */
@@ -302,8 +312,6 @@ void					bza_ref_stk_frame
 	)
 	{
 	t_frame_marker *	marker;
-	size_t				marker_off;
-	t_frame_marker *	cur_marker;
 
 	// TODO: better error handling
 	assert( a_stack != NULL);
