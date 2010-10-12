@@ -67,15 +67,6 @@ typedef struct 			t_frame_marker
 	size_t				prev_off;		// offset to previous frame
 	}					t_frame_marker;
 
-typedef
-void *					( * tf_allocator)
-	(
-	jmp_buf *			catcher,		// error handler (or null for immediate death)
-	void *				existing,		// existing block (if not null)
-	size_t				new_size		// number of bytes requested
-	)
-	;
-
 /** return offset of marker structure for top frame */
 static  // inline?
 size_t					bza_get_top_frame_marker_offset
@@ -185,6 +176,28 @@ void *					alloc_or_die
 	return NULL;  // dummy
 	}  // _________________________________________________________
 
+/**
+ * ALWAYS FAIL to allocate memory,
+ * TODO:  set policy for releasing existing block if realloc fails.
+ */
+static
+void *					no_alloc_just_die
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	void *				existing,		// existing block (if not null)
+	size_t				new_size		// number of bytes requested
+	)
+	{
+	if ( catcher != NULL)
+		{
+		longjmp( *catcher, 1);  // === abort ===
+		}  // error handler?
+
+	// just die, then
+	assert( "Resize not allowed" == NULL);
+	return NULL;  // dummy
+	}  // _________________________________________________________
+
 /** create a new (empty) stack, with "real time" support options */
 t_stack *				bza_cons_stack_rt
 	(
@@ -205,8 +218,9 @@ t_stack *				bza_cons_stack_rt
 
 	stack->size = stk_sz;
 	stack->top = 0;
-
-	// TODO:  define reallocation callback func ptr (based on is_fixed)
+	stack->alloc = is_fixed ?
+			no_alloc_just_die :
+			alloc_or_die ;
 
 	fx = is_fixed ? "fix" : "init";
 	MLOG_PRINTF( stderr, "*** STK: construct (%d b %s):\n", (int) stk_sz, fx);  // TEMP
@@ -279,6 +293,8 @@ size_t					bza_cons_stk_frame
 
 	frame_start = ( *a_stack)->top + sizeof( t_frame_marker);
 
+	// TODO:  fix excess reallocation
+
 	if ( next_size > ( *a_stack)->size)
 		{
 		// TODO: minimize allocation calls
@@ -286,7 +302,7 @@ size_t					bza_cons_stk_frame
 		// (more excess debug visibility vars)
 		ptr = *a_stack;
 		sz = next_size + sizeof( t_stack);
-		ptr = alloc_or_die( catcher, ptr, sz);
+		ptr = ( ( *a_stack)->alloc)( catcher, ptr, sz);
 		*a_stack = ptr;
 		}  // new "high water" mark?
 	// else:  use/reuse existing space

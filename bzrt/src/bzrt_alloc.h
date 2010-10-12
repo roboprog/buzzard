@@ -10,11 +10,20 @@
 
 #include <setjmp.h>
 
-// TODO:  define allocation handler here, put ptr in t_stack
+/** memory allocation handler (internal use only!) */
+typedef
+void *					( * tf_allocator)
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	void *				existing,		// existing block (if not null)
+	size_t				new_size		// number of bytes requested
+	)
+	;
 
 /** stub of a stack instance -- allocation is within a stack */
 typedef struct 			t_stack
 	{
+	tf_allocator		alloc;			// memory [re]allocator
 	size_t				top;			// offset to next available space
 	size_t				size;			// total size of stack so far
 	char				data[0];		// variable size data buffer
