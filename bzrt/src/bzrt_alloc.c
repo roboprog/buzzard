@@ -304,11 +304,11 @@ size_t					bza_cons_stk_frame
 		sz = next_size + sizeof( t_stack);
 		ptr = ( ( *a_stack)->alloc)( catcher, ptr, sz);
 		*a_stack = ptr;
+		( *a_stack)->size = next_size;
 		}  // new "high water" mark?
 	// else:  use/reuse existing space
 
 	( *a_stack)->top = next_top;
-	( *a_stack)->size = next_size;
 
 	marker = bza_get_frame_marker( *a_stack, next_marker_off);
 	marker->size = frame_sz;
