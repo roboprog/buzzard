@@ -190,6 +190,7 @@ void *					no_alloc_just_die
 	{
 	if ( catcher != NULL)
 		{
+		MLOG_PUTS( "\tResize not allowed\n");
 		longjmp( *catcher, 1);  // === abort ===
 		}  // error handler?
 

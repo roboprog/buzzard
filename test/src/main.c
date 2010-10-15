@@ -126,6 +126,8 @@ void					test_rt_stack_alloc( void)
 	size_t 				frames[ 3 ];
 	char *				data[ 3 ];
 	int					idx;
+	jmp_buf				catcher;
+	int					is_err;
 
 	puts( "\nTest real-time support frame allocation and deallocation"); fflush( stdout);
 
@@ -148,15 +150,32 @@ void					test_rt_stack_alloc( void)
 		assert( data[ idx ][ K256 - 1 ] == datums[ idx ]);
 		}  // test content of each block
 
+	// overallocate, test error handling
+
+	is_err = setjmp( catcher);
+	if ( ! is_err)
+		{
+		bza_cons_stk_frame( &catcher, &stack, K256 * 2);
+		assert( "Error check failed, this should not be reached" == NULL);
+		}  // initial "try" to overallocate?
+	// else:  falling through from the error check + longjmp
+	for ( idx = 0; idx < 3; idx++)
+
+		{
+		assert( data[ idx ][ 0 ] == datums[ idx ]);
+		assert( data[ idx ][ K256 - 1 ] == datums[ idx ]);
+		}  // *re*-test content of each block
+
+
+	// clean up
+
 	bza_deref_stk_frame( NULL, stack, frames[ 2 ]);
 	bza_deref_stk_frame( NULL, stack, frames[ 1 ]);
 	bza_deref_stk_frame( NULL, stack, frames[ 0 ]);
 
-	// TODO:  overallocate, test error handling
+	bza_dest_stack( NULL, &stack);
 
 	// TODO: take timings, figure how to test acceptability
-
-	bza_dest_stack( NULL, &stack);
 	}  // _________________________________________________________
 
 /**
