@@ -179,6 +179,23 @@ void					test_rt_stack_alloc( void)
 	}  // _________________________________________________________
 
 /**
+ * Test basic (immutable) byte array functionality
+ */
+static
+void					test_byte_array( void)
+	{
+
+	puts( "\nTest immutable byte array use"); fflush( stdout);
+
+	// TODO: asciiz array init / access
+
+	// TODO: test sub-array access
+
+	// TODO: test array concatenation
+
+	}  // _________________________________________________________
+
+/**
  * Drive tests.
  * TODO: xunit or something like that (but exit-on-failure for now)
  */
@@ -191,7 +208,18 @@ int						main
 	test_stack_init();
 	test_stack_alloc();
 	test_rt_stack_alloc();
-	// TODO:  play with out of memory error handling
+
+	test_byte_array();
+	// TODO: test_mutable_byte_array();
+
+	// TODO: basic I/O
+
+	// TODO: reference frame management
+
+	// TODO: task messaging
+
+	// TODO: thread as task
+
 	return 0;
 	}  // _________________________________________________________
 
