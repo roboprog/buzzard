@@ -3,13 +3,22 @@
 
 CFLAGS = -g -Wall
 
-# TODO: .o file list macro
-bin/libbzrt.a: bin/bzrt_alloc.o
-	(cd bin ; ar -rc libbzrt.a bzrt_alloc.o )
+HEADERS = src/bzrt_alloc.h	\
+		src/bzrt_bytes.h
 
-# TODO: .h file list macro
-bin/bzrt_alloc.o:	src/bzrt_alloc.c src/bzrt_alloc.h
+OBJECTS = bin/bzrt_alloc.o	\
+		bin/bzrt_bytes.o
+
+bin/libbzrt.a: $(OBJECTS)
+	(cd bin ; ar -rc libbzrt.a *.o )
+
+# TODO: compile rule
+
+bin/bzrt_alloc.o:	src/bzrt_alloc.c $(HEADERS)
 	$(CC) $(CFLAGS) src/bzrt_alloc.c -c -o bin/bzrt_alloc.o
+
+bin/bzrt_bytes.o:	src/bzrt_bytes.c $(HEADERS)
+	$(CC) $(CFLAGS) src/bzrt_bytes.c -c -o bin/bzrt_bytes.o
 
 
 # vi: ts=4 sw=4 ai
