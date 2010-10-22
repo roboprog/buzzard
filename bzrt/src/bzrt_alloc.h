@@ -8,6 +8,10 @@
  * $Id: $
  */
 
+#ifndef _BZRT_ALLOC_H
+#define _BZRT_ALLOC_H
+
+#include <unistd.h>
 #include <setjmp.h>
 
 /** memory allocation handler (internal use only!) */
@@ -98,6 +102,7 @@ void *					bza_get_frame_ptr
 	)
 	;
 
+#endif  // BZRT_ALLOC_H
 
 // vi: ts=4 sw=4 ai
 // *** EOF ***

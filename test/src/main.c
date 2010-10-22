@@ -29,6 +29,7 @@
 #include <assert.h>
 
 #include "bzrt_alloc.h"
+#include "bzrt_bytes.h"
 
 /**
  * Test (very basic) stack creation / destruction.
@@ -184,15 +185,28 @@ void					test_rt_stack_alloc( void)
 static
 void					test_byte_array( void)
 	{
+	static const
+	char *				TEST_STR = "Testing, 123";
+
+	t_stack *			stack;
+	size_t				barr;
 
 	puts( "\nTest immutable byte array use"); fflush( stdout);
 
-	// TODO: asciiz array init / access
+	stack = bza_cons_stack( NULL);
+
+	// asciiz array init / access
+
+	barr = bzb_from_asciiz( NULL, &stack, TEST_STR);
+	assert( bzb_size( NULL, stack, barr) == ( strlen( TEST_STR) + 1) );
+	assert( strcmp( bzb_to_asciiz( NULL, stack, barr), TEST_STR) == 0);
+	bzb_deref( NULL, stack, barr);
 
 	// TODO: test sub-array access
 
 	// TODO: test array concatenation
 
+	bza_dest_stack( NULL, &stack);
 	}  // _________________________________________________________
 
 /**
