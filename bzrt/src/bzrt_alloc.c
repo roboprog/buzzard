@@ -45,17 +45,7 @@
 #include "bzrt_alloc.h"
 
 #define DO_LOG	1
-
-#ifdef DO_LOG
-	#define MLOG_PUTS( s) fputs( (s), stderr)
-
-	// TODO: something a bit more clever (var-arg macro?)
-	#define MLOG_PRINTF	fprintf
-#else
-	#define MLOG_PUTS( s) /* */
-
-	#define MLOG_PRINTF	//
-#endif  // DO_LOG defined?
+#include "_log.h"
 
 /** stack frame marker */
 typedef struct 			t_frame_marker

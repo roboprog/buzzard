@@ -25,21 +25,24 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "bzrt_bytes.h"
 
 #define DO_LOG	1
+#include "_log.h"
 
-#ifdef DO_LOG
-	#define MLOG_PUTS( s) fputs( (s), stderr)
-
-	// TODO: something a bit more clever (var-arg macro?)
-	#define MLOG_PRINTF	fprintf
-#else
-	#define MLOG_PUTS( s) /* */
-
-	#define MLOG_PRINTF	//
-#endif  // DO_LOG defined?
-
+/** data structure to manage byte array */
+typedef struct			t_bytes
+	{
+	// TODO: immutable
+	size_t				len;			// length in bytes,
+										//  includes hidden terminator (\0)
+										//  just in case used as asciiz
+	char				data[ 0 ];		// variable size buffer for bytes
+	}					t_bytes;
 
 /** create a (mutable) byte array from an asciiz string, return offset */
 size_t					bzb_from_asciiz
@@ -52,7 +55,21 @@ size_t					bzb_from_asciiz
 	char *				src				// C string to be copied
 	)
 	{
-	// TODO
+	size_t				str_len;
+	size_t				alloc_len;
+	size_t				frame;
+	t_bytes *			barr;
+
+	assert( src != NULL);
+	MLOG_PRINTF( stderr, "*** B-A: from ascii \"%s\"\n", src);
+	str_len = strlen( src);
+
+	alloc_len = sizeof( t_bytes) + str_len + 1;
+	frame = bza_cons_stk_frame( catcher, a_stack, alloc_len);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, a_stack, frame);
+	barr->len = str_len;
+	strcpy( barr->data, src);
+	return frame;
 	}  // _________________________________________________________
 
 /** de-reference a byte array (decrement reference count) */
