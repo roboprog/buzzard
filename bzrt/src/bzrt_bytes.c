@@ -81,7 +81,8 @@ void					bzb_deref
 	size_t				bytes			// offset of byte array
 	)
 	{
-	// TODO
+	MLOG_PRINTF( stderr, "*** B-A: deref frame off %d\n", (int) bytes);  // TEMP
+	bza_deref_stk_frame( catcher, a_stack, bytes);
 	}  // _________________________________________________________
 
 /** return the size of the byte array (usable bytes) */
@@ -112,7 +113,11 @@ char *					bzb_to_asciiz
 	size_t				bytes			// offset of byte array
 	)
 	{
-	// TODO
+	t_bytes *			barr;
+
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, a_stack, bytes);
+	// note that we always have an extra '\0' just pass the end of the array
+	return barr->data;
 	}  // _________________________________________________________
 
 
