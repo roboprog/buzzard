@@ -66,7 +66,7 @@ size_t					bzb_from_asciiz
 
 	alloc_len = sizeof( t_bytes) + str_len + 1;
 	frame = bza_cons_stk_frame( catcher, a_stack, alloc_len);
-	barr = (t_bytes *) bza_get_frame_ptr( catcher, a_stack, frame);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, frame);
 	barr->len = str_len;
 	strcpy( barr->data, src);
 	return frame;
