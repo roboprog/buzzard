@@ -23,6 +23,20 @@ size_t					bzb_from_asciiz
 	)
 	;
 
+/** create a (mutable) byte arrray from another byte array subrange */
+size_t					bzb_subarray
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t				src,			// byte array from which to
+										//  copy the subrange
+	int					from,			// starting point (if >= 0)
+	int					len				// size to copy (if >= 0)
+	)
+	;
+
 /** de-reference a byte array (decrement reference count) */
 void					bzb_deref
 	(

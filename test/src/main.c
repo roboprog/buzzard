@@ -189,11 +189,15 @@ void					test_byte_array( void)
 	char *				TEST_STR = "Testing, 123";
 
 	t_stack *			stack;
+	size_t				empty_top;
 	size_t				barr;
+	size_t				head;
+	size_t				tail;
 
 	puts( "\nTest immutable byte array use"); fflush( stdout);
 
 	stack = bza_cons_stack( NULL);
+	empty_top = stack->top;
 
 	// asciiz array init / access
 
@@ -201,10 +205,30 @@ void					test_byte_array( void)
 	assert( bzb_size( NULL, stack, barr) == strlen( TEST_STR) );
 	assert( strcmp( bzb_to_asciiz( NULL, stack, barr), TEST_STR) == 0);
 	bzb_deref( NULL, stack, barr);
+	assert( stack->top == empty_top);
 
 	// TODO: test sub-array access
 
+	barr = bzb_from_asciiz( NULL, &stack, TEST_STR);
+
+	head = bzb_subarray( NULL, &stack, barr, 0, 3);
+	assert( memcmp( bzb_to_asciiz( NULL, stack, head), TEST_STR, 3) == 0);
+	bzb_deref( NULL, stack, head);
+
+	tail = bzb_subarray( NULL, &stack, barr, 9, -1);
+	assert( memcmp( bzb_to_asciiz( NULL, stack, tail), TEST_STR + 9, 3) == 0);
+	bzb_deref( NULL, stack, tail);
+
+	tail = bzb_subarray( NULL, &stack, barr, -1, 3);
+	assert( memcmp( bzb_to_asciiz( NULL, stack, tail), TEST_STR + 9, 3) == 0);
+	bzb_deref( NULL, stack, tail);
+
+	bzb_deref( NULL, stack, barr);
+	assert( stack->top == empty_top);
+
 	// TODO: test array concatenation
+
+	// TODO: test update attempt to immutable array
 
 	bza_dest_stack( NULL, &stack);
 	}  // _________________________________________________________
