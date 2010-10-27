@@ -198,7 +198,7 @@ void					test_byte_array( void)
 	// asciiz array init / access
 
 	barr = bzb_from_asciiz( NULL, &stack, TEST_STR);
-	assert( bzb_size( NULL, stack, barr) == ( strlen( TEST_STR) + 1) );
+	assert( bzb_size( NULL, stack, barr) == strlen( TEST_STR) );
 	assert( strcmp( bzb_to_asciiz( NULL, stack, barr), TEST_STR) == 0);
 	bzb_deref( NULL, stack, barr);
 

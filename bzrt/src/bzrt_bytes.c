@@ -57,7 +57,7 @@ size_t					bzb_from_asciiz
 	{
 	size_t				str_len;
 	size_t				alloc_len;
-	size_t				frame;
+	size_t				bytes;
 	t_bytes *			barr;
 
 	assert( src != NULL);
@@ -65,11 +65,11 @@ size_t					bzb_from_asciiz
 	str_len = strlen( src);
 
 	alloc_len = sizeof( t_bytes) + str_len + 1;
-	frame = bza_cons_stk_frame( catcher, a_stack, alloc_len);
-	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, frame);
+	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = str_len;
 	strcpy( barr->data, src);
-	return frame;
+	return bytes;
 	}  // _________________________________________________________
 
 /** de-reference a byte array (decrement reference count) */
@@ -93,7 +93,10 @@ size_t					bzb_size
 	size_t				bytes			// offset of byte array
 	)
 	{
-	// TODO
+	t_bytes *			barr;
+
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, a_stack, bytes);
+	return barr->len;
 	}  // _________________________________________________________
 
 /**
