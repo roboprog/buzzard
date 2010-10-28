@@ -86,6 +86,7 @@ size_t					bzb_subarray
 	)
 	{
 	// TODO:  eliminate redundant vars
+	int					mode;
 	size_t				src_size;
 	int					start;
 	int					stop;
@@ -101,10 +102,26 @@ size_t					bzb_subarray
 	MLOG_PRINTF( stderr, "*** B-A: from subarray @%d[ %d, %d ]\n", (int) src, from, len);
 
 	src_size = bzb_size( catcher, *a_stack, src);
-	start = from;  // TODO: check for "from end" flag
-	eff_len = ( len >= 0) ?
-			len :
-			( src_size - start);
+	mode =	( ( from >= 0) ? 2 : 0) +
+			( ( len >= 0) ? 1 : 0);
+	switch ( mode)
+		{
+		case 3 :
+				start = from;
+				eff_len = len;
+			break;
+		case 2 :
+				start = from;
+				eff_len = src_size - start;
+			break;
+		case 1 :
+				start = src_size - len;
+				eff_len = len;
+			break;
+		default :
+				assert( "start offset or length must be supplied" == NULL);
+			break;
+		}  // which arg mode?
 	stop = start + ( eff_len - 1);
 	// TODO:  bounds check!
 

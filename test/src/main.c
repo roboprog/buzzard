@@ -260,6 +260,8 @@ int						main
 
 	// TODO: thread as task
 
+	puts( "\n\nNO FATAL ERRORS, ALL GOOD!");
+
 	return 0;
 	}  // _________________________________________________________
 
