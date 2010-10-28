@@ -85,9 +85,11 @@ size_t					bzb_subarray
 	int					len				// size to copy (if >= 0)
 	)
 	{
+	// TODO:  eliminate redundant vars
 	size_t				src_size;
 	int					start;
 	int					stop;
+	int					eff_len;
 	size_t				alloc_len;
 	size_t				bytes;
 	t_bytes *			barr;
@@ -100,13 +102,16 @@ size_t					bzb_subarray
 
 	src_size = bzb_size( catcher, *a_stack, src);
 	start = from;  // TODO: check for "from end" flag
-	stop = start + ( len - 1);  // TODO:  check for "the rest" flag
+	eff_len = ( len >= 0) ?
+			len :
+			( src_size - start);
+	stop = start + ( eff_len - 1);
 	// TODO:  bounds check!
 
 	alloc_len = sizeof( t_bytes) + ( stop - start) + 2;
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
-	barr->len = len;  // TODO: adjust
+	barr->len = eff_len;
 	dptr = &( barr->data[ 0 ]);
 	sptr = bzb_to_asciiz( catcher, *a_stack, src);  // just get the pointer
 	// TODO: tune this tight
