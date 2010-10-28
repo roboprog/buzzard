@@ -72,6 +72,57 @@ size_t					bzb_from_asciiz
 	return bytes;
 	}  // _________________________________________________________
 
+/** create a (mutable) byte arrray from another byte array subrange */
+size_t					bzb_subarray
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t				src,			// byte array from which to
+										//  copy the subrange
+	int					from,			// starting point (if >= 0)
+	int					len				// size to copy (if >= 0)
+	)
+	{
+	size_t				src_size;
+	int					start;
+	int					stop;
+	size_t				alloc_len;
+	size_t				bytes;
+	t_bytes *			barr;
+	char *				dptr;
+	const
+	char *				sptr;
+	int					sidx;
+
+	MLOG_PRINTF( stderr, "*** B-A: from subarray @%d[ %d, %d ]\n", (int) src, from, len);
+
+	src_size = bzb_size( catcher, *a_stack, src);
+	start = from;  // TODO: check for "from end" flag
+	stop = start + ( len - 1);  // TODO:  check for "the rest" flag
+	// TODO:  bounds check!
+
+	alloc_len = sizeof( t_bytes) + ( stop - start) + 2;
+	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
+	barr->len = len;  // TODO: adjust
+	dptr = &( barr->data[ 0 ]);
+	sptr = bzb_to_asciiz( catcher, *a_stack, src);  // just get the pointer
+	// TODO: tune this tight
+	for ( sidx = start; sidx <= stop; sidx++)
+
+		{
+		*dptr = sptr[ sidx ];
+		dptr++;
+		}  // copy each byte
+
+	*dptr = '\0';
+
+	return bytes;
+	}  // _________________________________________________________
+
+
 /** de-reference a byte array (decrement reference count) */
 void					bzb_deref
 	(

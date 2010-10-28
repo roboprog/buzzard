@@ -230,6 +230,8 @@ void					test_byte_array( void)
 
 	// TODO: test update attempt to immutable array
 
+	// TODO: test bounds checking
+
 	bza_dest_stack( NULL, &stack);
 	}  // _________________________________________________________
 
