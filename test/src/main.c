@@ -187,12 +187,16 @@ void					test_byte_array( void)
 	{
 	static const
 	char *				TEST_STR = "Testing, 123";
+	const
+	size_t				TS_LEN = strlen( TEST_STR);
 
 	t_stack *			stack;
 	size_t				empty_top;
 	size_t				barr;
 	size_t				head;
 	size_t				tail;
+	size_t				srcs[ 4 ];
+	size_t				big;
 
 	puts( "\nTest immutable byte array use"); fflush( stdout);
 
@@ -202,7 +206,7 @@ void					test_byte_array( void)
 	// asciiz array init / access
 
 	barr = bzb_from_asciiz( NULL, &stack, TEST_STR);
-	assert( bzb_size( NULL, stack, barr) == strlen( TEST_STR) );
+	assert( bzb_size( NULL, stack, barr) == TS_LEN);
 	assert( strcmp( bzb_to_asciiz( NULL, stack, barr), TEST_STR) == 0);
 	bzb_deref( NULL, stack, barr);
 	assert( stack->top == empty_top);
@@ -227,6 +231,24 @@ void					test_byte_array( void)
 	assert( stack->top == empty_top);
 
 	// TODO: test array concatenation
+
+	barr = bzb_from_asciiz( NULL, &stack, TEST_STR);
+	srcs[ 0 ] = srcs[ 1 ] = srcs[ 2 ] = barr;
+	srcs[ 3 ] = 0;
+	big = bzb_concat( NULL, &stack, srcs);
+	bzb_deref( NULL, stack, barr);
+	assert( bzb_size( NULL, stack, big) == ( 3 * TS_LEN) );
+	assert( memcmp(
+			&( bzb_to_asciiz( NULL, stack, big)[ 0 ]),
+			TEST_STR, TS_LEN) == 0);
+	assert( memcmp(
+			&( bzb_to_asciiz( NULL, stack, big)[ TS_LEN ]),
+			TEST_STR, TS_LEN) == 0);
+	assert( memcmp(
+			&( bzb_to_asciiz( NULL, stack, big)[ 2 * TS_LEN ]),
+			TEST_STR, TS_LEN) == 0);
+	bzb_deref( NULL, stack, big);
+	assert( stack->top == empty_top);
 
 	// TODO: test update attempt to immutable array
 

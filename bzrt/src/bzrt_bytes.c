@@ -144,6 +144,39 @@ size_t					bzb_subarray
 	return bytes;
 	}  // _________________________________________________________
 
+/** create a (mutable) byte arrray by concatenating other bytes arrays */
+size_t					bzb_concat
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t *			srcs			// array of byte arrray (offsets),
+										//  terminated by a 0 entry.
+	)
+	{
+	size_t				src_len;
+	const
+	size_t *			src_ptr;
+	size_t				alloc_len;
+	size_t				bytes;
+
+	assert( srcs != NULL);
+	MLOG_PRINTF( stderr, "*** B-A: concat arrays @%d...\n", (int) srcs[ 0 ]);
+
+	src_len = 0;
+	for ( src_ptr = srcs; *src_ptr; src_ptr++)
+
+		{
+		assert( ( *src_ptr) <= ( ( *a_stack)->top) );
+		src_len += bzb_size( catcher, *a_stack, *src_ptr);
+		}  // sum each src size
+
+	alloc_len = sizeof( t_bytes) + src_len + 1;
+	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
+	// TODO: init
+	return bytes;
+	}  // _________________________________________________________
 
 /** de-reference a byte array (decrement reference count) */
 void					bzb_deref

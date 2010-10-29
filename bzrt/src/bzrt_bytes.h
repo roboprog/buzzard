@@ -37,6 +37,18 @@ size_t					bzb_subarray
 	)
 	;
 
+/** create a (mutable) byte arrray by concatenating other bytes arrays */
+size_t					bzb_concat
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t *			srcs			// array of byte arrray (offsets),
+										//  terminated by a 0 entry.
+	)
+	;
+
 /** de-reference a byte array (decrement reference count) */
 void					bzb_deref
 	(
