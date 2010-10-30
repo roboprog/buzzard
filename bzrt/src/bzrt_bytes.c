@@ -132,6 +132,7 @@ size_t					bzb_subarray
 	dptr = &( barr->data[ 0 ]);
 	sptr = bzb_to_asciiz( catcher, *a_stack, src);  // just get the pointer
 	// TODO: tune this tight
+	// or, just replace it with memcpy call!
 	for ( sidx = start; sidx <= stop; sidx++)
 
 		{
@@ -160,6 +161,8 @@ size_t					bzb_concat
 	size_t *			src_ptr;
 	size_t				alloc_len;
 	size_t				bytes;
+	t_bytes *			barr;
+	char *				dptr;
 
 	assert( srcs != NULL);
 	MLOG_PRINTF( stderr, "*** B-A: concat arrays @%d...\n", (int) srcs[ 0 ]);
@@ -174,7 +177,19 @@ size_t					bzb_concat
 
 	alloc_len = sizeof( t_bytes) + src_len + 1;
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
-	// TODO: init
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
+	barr->len = src_len;
+	dptr = &( barr->data[ 0 ]);
+	for ( src_ptr = srcs; *src_ptr; src_ptr++)
+
+		{
+		src_len = bzb_size( catcher, *a_stack, *src_ptr);
+		memcpy( dptr, bzb_to_asciiz( catcher, *a_stack, *src_ptr), src_len);
+		dptr += src_len;
+		}  // sum each src size
+
+	*dptr = '\0';
+
 	return bytes;
 	}  // _________________________________________________________
 
