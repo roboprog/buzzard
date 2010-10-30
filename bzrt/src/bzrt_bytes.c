@@ -123,7 +123,18 @@ size_t					bzb_subarray
 			break;
 		}  // which arg mode?
 	stop = start + ( eff_len - 1);
-	// TODO:  bounds check!
+
+	// bounds check!
+
+	if ( ! ( ( 0 <= start) && ( stop < src_size) ) )
+		{
+		if ( catcher != NULL)
+			{
+			longjmp( *catcher, 1);  // === abort ===
+			}  // error handler?
+
+		assert( "start/stop out of bounds" == NULL);
+		}  // out of bounds (start or stop)?
 
 	alloc_len = sizeof( t_bytes) + ( stop - start) + 2;
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);

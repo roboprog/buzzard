@@ -197,6 +197,8 @@ void					test_byte_array( void)
 	size_t				tail;
 	size_t				srcs[ 4 ];
 	size_t				big;
+	jmp_buf				catcher;
+	int					is_err;
 
 	puts( "\nTest immutable byte array use"); fflush( stdout);
 
@@ -211,7 +213,7 @@ void					test_byte_array( void)
 	bzb_deref( NULL, stack, barr);
 	assert( stack->top == empty_top);
 
-	// TODO: test sub-array access
+	// test sub-array access
 
 	barr = bzb_from_asciiz( NULL, &stack, TEST_STR);
 
@@ -230,7 +232,7 @@ void					test_byte_array( void)
 	bzb_deref( NULL, stack, barr);
 	assert( stack->top == empty_top);
 
-	// TODO: test array concatenation
+	// test array concatenation
 
 	barr = bzb_from_asciiz( NULL, &stack, TEST_STR);
 	srcs[ 0 ] = srcs[ 1 ] = srcs[ 2 ] = barr;
@@ -252,7 +254,25 @@ void					test_byte_array( void)
 
 	// TODO: test update attempt to immutable array
 
-	// TODO: test bounds checking
+	// test bounds checking
+
+	barr = bzb_from_asciiz( NULL, &stack, TEST_STR);
+	is_err = setjmp( catcher);
+	if ( ! is_err)
+		{
+		bzb_subarray( &catcher, &stack, barr, 0, 1000);
+		assert( "Error check failed, this should not be reached" == NULL);
+		}  // initial "try" to overallocate?
+	// else:  falling through from the error check + longjmp
+	is_err = setjmp( catcher);
+	if ( ! is_err)
+		{
+		bzb_subarray( &catcher, &stack, barr, 1000, 1);
+		assert( "Error check failed, this should not be reached" == NULL);
+		}  // initial "try" to overallocate?
+	// else:  falling through from the error check + longjmp
+	bzb_deref( NULL, stack, barr);
+	assert( stack->top == empty_top);
 
 	bza_dest_stack( NULL, &stack);
 	}  // _________________________________________________________
