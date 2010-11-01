@@ -277,6 +277,37 @@ void					test_byte_array( void)
 	bza_dest_stack( NULL, &stack);
 	}  // _________________________________________________________
 
+static
+void					test_mutable_byte_array( void)
+	{
+/**
+ * Modify or recreate, as needed, the given byte array
+ *  by inserting / overwriting the specified byte range
+ *  with bytes from a second array.
+ *  IMPORTANT:  deref the dst arg after this call,
+ *  then use return value in its place  --
+ *  this may or may not be the same storage area,
+ *  but the reference cound will be adjusted as needed.
+ */
+/*
+size_t					bzb_splice
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t				dst,			// byte array into which to
+										//  put the new data.
+	int					dfrom,			// starting point (if >= 0)
+	int					dlen,			// size to copy (if >= 0)
+	size_t				src,			// byte array from which to
+										//  copy the subrange
+	int					sfrom,			// starting point (if >= 0)
+	int					slen			// size to copy (if >= 0)
+	)
+*/
+	}  // _________________________________________________________
+
 /**
  * Drive tests.
  * TODO: xunit or something like that (but exit-on-failure for now)
@@ -292,7 +323,7 @@ int						main
 	test_rt_stack_alloc();
 
 	test_byte_array();
-	// TODO: test_mutable_byte_array();
+	test_mutable_byte_array();
 
 	// TODO: basic I/O
 
