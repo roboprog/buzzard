@@ -277,35 +277,80 @@ void					test_byte_array( void)
 	bza_dest_stack( NULL, &stack);
 	}  // _________________________________________________________
 
+/**
+ * Test byte array update functionality
+ */
 static
 void					test_mutable_byte_array( void)
 	{
-/**
- * Modify or recreate, as needed, the given byte array
- *  by inserting / overwriting the specified byte range
- *  with bytes from a second array.
- *  IMPORTANT:  deref the dst arg after this call,
- *  then use return value in its place  --
- *  this may or may not be the same storage area,
- *  but the reference cound will be adjusted as needed.
- */
-/*
-size_t					bzb_splice
-	(
-	jmp_buf *			catcher,		// error handler (or null for immediate death)
-	t_stack * *			a_stack,		// a stack on/in which to
-										// allocate the frame
-										// (which may be relocated!)
-	size_t				dst,			// byte array into which to
-										//  put the new data.
-	int					dfrom,			// starting point (if >= 0)
-	int					dlen,			// size to copy (if >= 0)
-	size_t				src,			// byte array from which to
-										//  copy the subrange
-	int					sfrom,			// starting point (if >= 0)
-	int					slen			// size to copy (if >= 0)
-	)
-*/
+	const
+	char *				HW = "Hello, world";
+	const
+	char *				NAME = "Wayne's ";
+	const
+	char *				SIMPLE_SPLICE = "Hello, Wayne's world";
+
+	t_stack *			stack;
+	size_t				empty_top;
+	size_t				dst;
+	size_t				src;
+	size_t				result;
+
+	puts( "\nTest mutable byte array use"); fflush( stdout);
+
+	stack = bza_cons_stack( NULL);
+	empty_top = stack->top;
+
+	// expand and relocate case:
+
+	dst = bzb_from_asciiz( NULL, &stack, HW);
+	src = bzb_from_asciiz( NULL, &stack, NAME);
+	result = bzb_splice( NULL, &stack,
+			dst, 7, 0,
+			src, -1, -1);
+	bzb_deref( NULL, stack, dst);
+	dst = result;
+	assert( memcmp( SIMPLE_SPLICE,
+			bzb_to_asciiz( NULL, stack, dst),
+			bzb_size( NULL, stack, dst) ) == 0);
+	bzb_deref( NULL, stack, dst);
+	bzb_deref( NULL, stack, src);
+	assert( stack->top == empty_top);
+
+	// TODO: reuse large buffer case:
+
+	dst = bzb_init_size( NULL, &stack, strlen( SIMPLE_SPLICE) );
+
+	src = bzb_from_asciiz( NULL, &stack, HW);
+	result = bzb_splice( NULL, &stack,
+			dst, 0, bzb_size( NULL, stack, src),
+			src, -1, -1);
+	assert( result == dst);  // *not* moved / expanded
+	bzb_deref( NULL, stack, dst);  // code as if no-move not known
+	dst = result;
+	assert( memcmp( HW,
+			bzb_to_asciiz( NULL, stack, dst),
+			bzb_size( NULL, stack, dst) ) == 0);
+	bzb_deref( NULL, stack, src);
+
+	src = bzb_from_asciiz( NULL, &stack, NAME);
+	result = bzb_splice( NULL, &stack,
+			dst, 7, 0,
+			src, -1, -1);
+	assert( result == dst);  // still *not* moved / expanded
+	bzb_deref( NULL, stack, dst);  // code as if no-move not known
+	dst = result;
+	assert( memcmp( SIMPLE_SPLICE,
+			bzb_to_asciiz( NULL, stack, dst),
+			bzb_size( NULL, stack, dst) ) == 0);
+	bzb_deref( NULL, stack, dst);
+	bzb_deref( NULL, stack, src);
+
+	assert( stack->top == empty_top);
+
+	// TODO:  test default "-1" in splice args
+
+	bza_dest_stack( NULL, &stack);
 	}  // _________________________________________________________
 
 /**
