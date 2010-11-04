@@ -23,6 +23,17 @@ size_t					bzb_from_asciiz
 	)
 	;
 
+/** create a (mutable) byte array buffer with an initial size */
+size_t					bzb_init_size
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t				size			// initial size of buffer
+	)
+	;
+
 /** create a (mutable) byte arrray from another byte array subrange */
 size_t					bzb_subarray
 	(

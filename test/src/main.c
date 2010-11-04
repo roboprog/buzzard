@@ -317,7 +317,7 @@ void					test_mutable_byte_array( void)
 	bzb_deref( NULL, stack, src);
 	assert( stack->top == empty_top);
 
-	// TODO: reuse large buffer case:
+	// reuse large buffer case:
 
 	dst = bzb_init_size( NULL, &stack, strlen( SIMPLE_SPLICE) );
 
