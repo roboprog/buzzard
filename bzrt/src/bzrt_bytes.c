@@ -82,7 +82,61 @@ size_t					bzb_init_size
 	size_t				size			// initial size of buffer
 	)
 	{
+	assert( "TODO" == NULL);
 	return 0;  // TODO
+	}  // _________________________________________________________
+
+static
+void					calc_bounds
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	size_t				src_size,		// total size of source
+	int					from,			// starting point (if >= 0)
+	int					len,			// size to copy (if >= 0)
+	int *				start,			// 0 based index of first byte,
+										//  not null
+	int *				stop,			// 0 based index of final byte,
+										//  not null
+	int *				eff_len			// total byte count to copy,
+										//  not null
+	)
+	{
+	int					mode;
+
+	mode =	( ( from >= 0) ? 2 : 0) +
+			( ( len >= 0) ? 1 : 0);
+	switch ( mode)
+		{
+		case 3 :
+				*start = from;
+				*eff_len = len;
+			break;
+		case 2 :
+				*start = from;
+				*eff_len = src_size - *start;
+			break;
+		case 1 :
+				*start = src_size - len;
+				*eff_len = len;
+			break;
+		default :
+				assert( "start offset or length must be supplied" == NULL);
+			break;
+		}  // which arg mode?
+	*stop = *start + ( *eff_len - 1);  // TODO:  check for off-by-one
+
+	// bounds check!
+
+	if ( ! ( ( 0 <= *start) && ( *stop < src_size) ) )
+		{
+		if ( catcher != NULL)
+			{
+			longjmp( *catcher, 1);  // === abort ===
+			}  // error handler?
+
+		assert( "start/stop out of bounds" == NULL);
+		}  // out of bounds (start or stop)?
+
 	}  // _________________________________________________________
 
 /** create a (mutable) byte arrray from another byte array subrange */
@@ -99,8 +153,6 @@ size_t					bzb_subarray
 	)
 	{
 	// TODO:  eliminate redundant vars
-	int					mode;
-	size_t				src_size;
 	int					start;
 	int					stop;
 	int					eff_len;
@@ -114,41 +166,8 @@ size_t					bzb_subarray
 
 	MLOG_PRINTF( stderr, "*** B-A: from subarray @%d[ %d, %d ]\n", (int) src, from, len);
 
-	src_size = bzb_size( catcher, *a_stack, src);
-	mode =	( ( from >= 0) ? 2 : 0) +
-			( ( len >= 0) ? 1 : 0);
-	switch ( mode)
-		{
-		case 3 :
-				start = from;
-				eff_len = len;
-			break;
-		case 2 :
-				start = from;
-				eff_len = src_size - start;
-			break;
-		case 1 :
-				start = src_size - len;
-				eff_len = len;
-			break;
-		default :
-				assert( "start offset or length must be supplied" == NULL);
-			break;
-		}  // which arg mode?
-	stop = start + ( eff_len - 1);
-
-	// bounds check!
-
-	if ( ! ( ( 0 <= start) && ( stop < src_size) ) )
-		{
-		if ( catcher != NULL)
-			{
-			longjmp( *catcher, 1);  // === abort ===
-			}  // error handler?
-
-		assert( "start/stop out of bounds" == NULL);
-		}  // out of bounds (start or stop)?
-
+	calc_bounds( catcher, bzb_size( catcher, *a_stack, src), from, len,
+			&start, &stop, &eff_len);
 	alloc_len = sizeof( t_bytes) + ( stop - start) + 2;
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
@@ -242,8 +261,11 @@ size_t					bzb_splice
 	int					slen			// size to copy (if >= 0)
 	)
 	{
-	// TODO: attempt to match perl string splice semantics
 	// TODO: deal with src == dst case
+	assert( dst != src);
+
+	// attempt to match perl list splice semantics (list of bytes, here)
+
 	assert( "TODO" == NULL);
 	}  // _________________________________________________________
 
