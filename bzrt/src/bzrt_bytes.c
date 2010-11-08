@@ -261,8 +261,25 @@ size_t					bzb_splice
 	int					slen			// size to copy (if >= 0)
 	)
 	{
+	int					d_start;
+	int					d_stop;
+	int					d_eff_len;
+	int					s_start;
+	int					s_stop;
+	int					s_eff_len;
+
+	MLOG_PRINTF( stderr, "*** B-A: splice @%d[ %d, %d ] <- @%d[ %d, %d ]\n", (int) dst, dfrom, dlen, (int) src, sfrom, slen);
+
 	// TODO: deal with src == dst case
 	assert( dst != src);
+
+	// determine the extent of the replacement within the destination buf:
+	calc_bounds( catcher, bzb_size( catcher, *a_stack, dst), dfrom, dlen,
+			&d_start, &d_stop, &d_eff_len);
+
+	// determine the extent to be grabbed from the source buf:
+	calc_bounds( catcher, bzb_size( catcher, *a_stack, src), sfrom, slen,
+			&s_start, &s_stop, &s_eff_len);
 
 	// attempt to match perl list splice semantics (list of bytes, here)
 

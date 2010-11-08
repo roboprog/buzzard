@@ -307,7 +307,7 @@ void					test_mutable_byte_array( void)
 	src = bzb_from_asciiz( NULL, &stack, NAME);
 	result = bzb_splice( NULL, &stack,
 			dst, 7, 0,
-			src, -1, -1);
+			src, 0, -1);
 	bzb_deref( NULL, stack, dst);
 	dst = result;
 	assert( memcmp( SIMPLE_SPLICE,
@@ -324,7 +324,7 @@ void					test_mutable_byte_array( void)
 	src = bzb_from_asciiz( NULL, &stack, HW);
 	result = bzb_splice( NULL, &stack,
 			dst, 0, bzb_size( NULL, stack, src),
-			src, -1, -1);
+			src, 0, -1);
 	assert( result == dst);  // *not* moved / expanded
 	bzb_deref( NULL, stack, dst);  // code as if no-move not known
 	dst = result;
@@ -336,7 +336,7 @@ void					test_mutable_byte_array( void)
 	src = bzb_from_asciiz( NULL, &stack, NAME);
 	result = bzb_splice( NULL, &stack,
 			dst, 7, 0,
-			src, -1, -1);
+			src, 0, -1);
 	assert( result == dst);  // still *not* moved / expanded
 	bzb_deref( NULL, stack, dst);  // code as if no-move not known
 	dst = result;
