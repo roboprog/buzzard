@@ -261,12 +261,18 @@ size_t					bzb_splice
 	int					slen			// size to copy (if >= 0)
 	)
 	{
+	size_t				d_size;
 	int					d_start;
 	int					d_stop;
 	int					d_eff_len;
 	int					s_start;
 	int					s_stop;
 	int					s_eff_len;
+	size_t				src_len;
+	size_t				alloc_len;
+	size_t				bytes;
+	t_bytes *			barr;
+	char *				dptr;
 
 	MLOG_PRINTF( stderr, "*** B-A: splice @%d[ %d, %d ] <- @%d[ %d, %d ]\n", (int) dst, dfrom, dlen, (int) src, sfrom, slen);
 
@@ -274,16 +280,35 @@ size_t					bzb_splice
 	assert( dst != src);
 
 	// determine the extent of the replacement within the destination buf:
-	calc_bounds( catcher, bzb_size( catcher, *a_stack, dst), dfrom, dlen,
+	d_size = bzb_size( catcher, *a_stack, dst);
+	calc_bounds( catcher, d_size, dfrom, dlen,
 			&d_start, &d_stop, &d_eff_len);
 
 	// determine the extent to be grabbed from the source buf:
 	calc_bounds( catcher, bzb_size( catcher, *a_stack, src), sfrom, slen,
 			&s_start, &s_stop, &s_eff_len);
 
-	// attempt to match perl list splice semantics (list of bytes, here)
+	src_len = ( d_size - d_eff_len) + s_eff_len;
+	alloc_len = sizeof( t_bytes) + src_len + 1;
+	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
+	barr->len = src_len;
+	dptr = &( barr->data[ 0 ]);
+	memcpy( dptr,
+			bzb_to_asciiz( catcher, *a_stack, dst),
+			d_start);
+	dptr += d_start;
+	memcpy( dptr,
+			&( bzb_to_asciiz( catcher, *a_stack, src)[ s_start ]),
+			s_eff_len);
+	dptr += s_eff_len;
+	memcpy( dptr,
+			&( bzb_to_asciiz( catcher, *a_stack, dst)[ d_stop + 1 ]),
+			( d_size - d_stop) );
+	dptr += ( d_size - d_stop);
+	*dptr = '\0';
 
-	assert( "TODO" == NULL);
+	return bytes;
 	}  // _________________________________________________________
 
 /** reference a byte array (increment reference count) */
