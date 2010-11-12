@@ -38,9 +38,11 @@
 typedef struct			t_bytes
 	{
 	// TODO: immutable
-	size_t				len;			// length in bytes,
-										//  includes hidden terminator (\0)
-										//  just in case used as asciiz
+	size_t				len;			// length in usable bytes,
+										//  excludes hidden terminator (\0)
+										//  added just in case used as asciiz
+	size_t				alloc;			// size allocated,
+										//  may be larger than len.
 	char				data[ 0 ];		// variable size buffer for bytes
 	}					t_bytes;
 
@@ -68,6 +70,7 @@ size_t					bzb_from_asciiz
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = str_len;
+	barr->alloc = str_len + 1;
 	strcpy( barr->data, src);
 	return bytes;
 	}  // _________________________________________________________
@@ -172,6 +175,7 @@ size_t					bzb_subarray
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = eff_len;
+	barr->alloc = eff_len + 1;
 	dptr = &( barr->data[ 0 ]);
 	sptr = bzb_to_asciiz( catcher, *a_stack, src);  // just get the pointer
 	// TODO: tune this tight
@@ -222,6 +226,7 @@ size_t					bzb_concat
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = src_len;
+	barr->alloc = src_len + 1;
 	dptr = &( barr->data[ 0 ]);
 	for ( src_ptr = srcs; *src_ptr; src_ptr++)
 
@@ -293,6 +298,7 @@ size_t					bzb_splice
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = src_len;
+	barr->alloc = src_len + 1;
 	dptr = &( barr->data[ 0 ]);
 	memcpy( dptr,
 			bzb_to_asciiz( catcher, *a_stack, dst),
