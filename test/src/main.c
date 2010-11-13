@@ -303,6 +303,7 @@ void					test_mutable_byte_array( void)
 
 	// expand and relocate case:
 
+/*
 	dst = bzb_from_asciiz( NULL, &stack, HW);
 	src = bzb_from_asciiz( NULL, &stack, NAME);
 	result = bzb_splice( NULL, &stack,
@@ -316,11 +317,13 @@ void					test_mutable_byte_array( void)
 	bzb_deref( NULL, stack, dst);
 	bzb_deref( NULL, stack, src);
 	assert( stack->top == empty_top);
+*/
 
 	// reuse large buffer case:
 
 	dst = bzb_init_size( NULL, &stack, strlen( SIMPLE_SPLICE) + 1);
 
+/*
 	src = bzb_from_asciiz( NULL, &stack, HW);
 	result = bzb_splice( NULL, &stack,
 			dst, 0, bzb_size( NULL, stack, src),
@@ -343,8 +346,9 @@ void					test_mutable_byte_array( void)
 	assert( memcmp( SIMPLE_SPLICE,
 			bzb_to_asciiz( NULL, stack, dst),
 			bzb_size( NULL, stack, dst) ) == 0);
-	bzb_deref( NULL, stack, dst);
 	bzb_deref( NULL, stack, src);
+*/
+	bzb_deref( NULL, stack, dst);
 
 	assert( stack->top == empty_top);
 

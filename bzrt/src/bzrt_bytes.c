@@ -255,6 +255,7 @@ size_t					bzb_concat
 	}  // _________________________________________________________
 
 /**
+/ **
  * Modify or recreate, as needed, the given byte array
  *  by inserting / overwriting the specified byte range
  *  with bytes from a second array.
@@ -262,7 +263,7 @@ size_t					bzb_concat
  *  then use return value in its place  --
  *  this may or may not be the same storage area,
  *  but the reference cound will be adjusted as needed.
- */
+ * /
 size_t					bzb_splice
 	(
 	jmp_buf *			catcher,		// error handler (or null for immediate death)
@@ -340,6 +341,7 @@ size_t					bzb_splice
 
 	return bytes;
 	}  // _________________________________________________________
+ */
 
 /** reference a byte array (increment reference count) */
 void					bzb_ref
