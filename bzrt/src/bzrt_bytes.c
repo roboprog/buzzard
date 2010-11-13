@@ -98,7 +98,7 @@ size_t					bzb_init_size
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = 0;
 	barr->alloc = size;
-	barr->data[ 0 ] == '\0';
+	barr->data[ 0 ] = '\0';
 	return bytes;
 	}  // _________________________________________________________
 
@@ -286,7 +286,7 @@ size_t					bzb_splice
 	int					s_start;
 	int					s_stop;
 	int					s_eff_len;
-	size_t				src_len;
+	size_t				tot_len;
 	size_t				alloc_len;
 	size_t				bytes;
 	t_bytes *			barr;
@@ -307,12 +307,22 @@ size_t					bzb_splice
 	calc_bounds( catcher, bzb_size( catcher, *a_stack, src), sfrom, slen,
 			&s_start, &s_stop, &s_eff_len);
 
-	src_len = ( d_size - d_eff_len) + s_eff_len;
-	alloc_len = sizeof( t_bytes) + src_len + 1;
-	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
-	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
-	barr->len = src_len;
-	barr->alloc = src_len + 1;
+	tot_len = ( d_size - d_eff_len) + s_eff_len;
+	if ( tot_len <= d_size)
+		{
+		bytes = dst;
+		// "barr" assigned above
+		bzb_ref( catcher, *a_stack, bytes);
+		}  // room still?
+	else
+		{
+		// TODO:  grow a reasonable amount, not just exactly enough
+		alloc_len = sizeof( t_bytes) + tot_len;
+		bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
+		barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
+		barr->alloc = tot_len + 1;
+		}  // need to grow a bigger buffer?
+	barr->len = tot_len;
 	dptr = &( barr->data[ 0 ]);
 	memcpy( dptr,
 			bzb_to_asciiz( catcher, *a_stack, dst),
@@ -340,8 +350,8 @@ void					bzb_ref
 	size_t				bytes			// offset of byte array
 	)
 	{
-	// TODO
-	assert( "TODO" == NULL);
+	MLOG_PRINTF( stderr, "*** B-A: ref frame off %d\n", (int) bytes);  // TEMP
+	bza_ref_stk_frame( catcher, a_stack, bytes);
 	}  // _________________________________________________________
 
 /** de-reference a byte array (decrement reference count) */
