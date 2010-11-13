@@ -319,7 +319,7 @@ void					test_mutable_byte_array( void)
 
 	// reuse large buffer case:
 
-	dst = bzb_init_size( NULL, &stack, strlen( SIMPLE_SPLICE) );
+	dst = bzb_init_size( NULL, &stack, strlen( SIMPLE_SPLICE) + 1);
 
 	src = bzb_from_asciiz( NULL, &stack, HW);
 	result = bzb_splice( NULL, &stack,

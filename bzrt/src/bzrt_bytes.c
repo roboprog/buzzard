@@ -85,8 +85,21 @@ size_t					bzb_init_size
 	size_t				size			// initial size of buffer
 	)
 	{
-	assert( "TODO" == NULL);
-	return 0;  // TODO
+	size_t				alloc_len;
+	size_t				bytes;
+	t_bytes *			barr;
+
+	MLOG_PRINTF( stderr, "*** B-A: reserved size %d\n", (int) size);
+
+	assert( size > 0);
+
+	alloc_len = sizeof( t_bytes) + size;
+	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
+	barr->len = 0;
+	barr->alloc = size;
+	barr->data[ 0 ] == '\0';
+	return bytes;
 	}  // _________________________________________________________
 
 static
@@ -285,7 +298,8 @@ size_t					bzb_splice
 	assert( dst != src);
 
 	// determine the extent of the replacement within the destination buf:
-	d_size = bzb_size( catcher, *a_stack, dst);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, dst);
+	d_size = barr->alloc;
 	calc_bounds( catcher, d_size, dfrom, dlen,
 			&d_start, &d_stop, &d_eff_len);
 
