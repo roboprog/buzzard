@@ -44,7 +44,7 @@
 
 #include "bzrt_alloc.h"
 
-#define DO_LOG	1
+// #define DO_LOG	1
 #include "_log.h"
 
 /** stack frame marker */
