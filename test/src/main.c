@@ -283,23 +283,65 @@ void					test_byte_array( void)
 static
 void					test_mutable_byte_array( void)
 	{
+/*
 	const
 	char *				HW = "Hello, world";
 	const
 	char *				NAME = "Wayne's ";
 	const
 	char *				SIMPLE_SPLICE = "Hello, Wayne's world";
+*/
+	const
+	char *				CAT_RESULT = "cha, cha, cha";
 
 	t_stack *			stack;
 	size_t				empty_top;
 	size_t				dst;
 	size_t				src;
+	size_t				src2;
+	int					cnt;
 	size_t				result;
 
 	puts( "\nTest mutable byte array use"); fflush( stdout);
 
 	stack = bza_cons_stack( NULL);
 	empty_top = stack->top;
+
+	// TODO: concatenate to existing too-small buffer
+
+	// concatenate to existing largish buffer
+
+	dst = bzb_init_size( NULL, &stack, strlen( CAT_RESULT) + 1);
+	src = bzb_from_asciiz( NULL, &stack, "cha");
+	src2 = bzb_from_asciiz( NULL, &stack, ", ");
+
+	for ( cnt = 1; ; cnt++)
+
+		{
+		result = bzb_concat_to( NULL, &stack, dst, src);
+		assert( result == dst);  // *not* moved / expanded
+		bzb_deref( NULL, stack, dst);  // code as if no-move not known
+		dst = result;
+
+		if ( cnt >= 3)
+			{
+			break;  // === stop ===
+			}  // done?
+
+		result = bzb_concat_to( NULL, &stack, dst, src2);
+		assert( result == dst);  // *not* moved / expanded
+		bzb_deref( NULL, stack, dst);  // code as if no-move not known
+		dst = result;
+		}  // add each "cha" to output
+
+	assert( memcmp( CAT_RESULT,
+			bzb_to_asciiz( NULL, stack, dst),
+			bzb_size( NULL, stack, dst) ) == 0);
+	bzb_deref( NULL, stack, src);
+	bzb_deref( NULL, stack, src2);
+	bzb_deref( NULL, stack, dst);
+
+	assert( stack->top == empty_top);
 
 	// expand and relocate case:
 
@@ -321,9 +363,9 @@ void					test_mutable_byte_array( void)
 
 	// reuse large buffer case:
 
+/*
 	dst = bzb_init_size( NULL, &stack, strlen( SIMPLE_SPLICE) + 1);
 
-/*
 	src = bzb_from_asciiz( NULL, &stack, HW);
 	result = bzb_splice( NULL, &stack,
 			dst, 0, bzb_size( NULL, stack, src),
@@ -347,10 +389,10 @@ void					test_mutable_byte_array( void)
 			bzb_to_asciiz( NULL, stack, dst),
 			bzb_size( NULL, stack, dst) ) == 0);
 	bzb_deref( NULL, stack, src);
-*/
 	bzb_deref( NULL, stack, dst);
 
 	assert( stack->top == empty_top);
+*/
 
 	// TODO:  test default "-1" in splice args
 

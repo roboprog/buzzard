@@ -60,6 +60,19 @@ size_t					bzb_concat
 	)
 	;
 
+/** update a (mutable) byte array by appending another byte array */
+size_t					bzb_concat_to
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t				dst,			// byte array into which to
+										//  put the new data.
+	size_t				src				// source byte arrray (offsets),
+	)
+	;
+
 /**
  * Modify or recreate, as needed, the given byte array
  *  by inserting / overwriting the specified byte range

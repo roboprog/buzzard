@@ -254,6 +254,25 @@ size_t					bzb_concat
 	return bytes;
 	}  // _________________________________________________________
 
+/** update a (mutable) byte array by appending another byte array */
+size_t					bzb_concat_to
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t				dst,			// byte array into which to
+										//  put the new data.
+	size_t				src				// source byte arrray (offsets),
+	)
+	{
+	size_t				srcs[] = { dst, src };
+
+	// TODO:  attempt to reuse the buffer!
+
+	return bzb_concat( catcher, a_stack, srcs);
+	}  // _________________________________________________________
+
 /**
 / **
  * Modify or recreate, as needed, the given byte array
