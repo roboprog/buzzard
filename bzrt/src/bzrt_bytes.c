@@ -205,6 +205,32 @@ size_t					bzb_subarray
 	return bytes;
 	}  // _________________________________________________________
 
+/** return the total length of bytes to be concatentated (not counting safe-stop byte) */
+static
+size_t					get_cat_src_len
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	size_t *			srcs			// array of byte arrray (offsets),
+										//  terminated by a 0 entry.
+	)
+	{
+	size_t				src_len;
+	size_t *			src_ptr;
+
+	src_len = 0;
+	for ( src_ptr = srcs; *src_ptr; src_ptr++)
+
+		{
+		assert( ( *src_ptr) <= ( ( *a_stack)->top) );
+		src_len += bzb_size( catcher, *a_stack, *src_ptr);
+		}  // sum each src size
+
+	return src_len;
+	}  // _________________________________________________________
+
 /** create a (mutable) byte arrray by concatenating other bytes arrays */
 size_t					bzb_concat
 	(
@@ -227,14 +253,7 @@ size_t					bzb_concat
 	assert( srcs != NULL);
 	MLOG_PRINTF( stderr, "*** B-A: concat arrays @%d...\n", (int) srcs[ 0 ]);
 
-	src_len = 0;
-	for ( src_ptr = srcs; *src_ptr; src_ptr++)
-
-		{
-		assert( ( *src_ptr) <= ( ( *a_stack)->top) );
-		src_len += bzb_size( catcher, *a_stack, *src_ptr);
-		}  // sum each src size
-
+	src_len = get_cat_src_len( catcher, a_stack, srcs);
 	alloc_len = sizeof( t_bytes) + src_len + 1;
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
@@ -266,11 +285,24 @@ size_t					bzb_concat_to
 	size_t				src				// source byte arrray (offsets),
 	)
 	{
-	size_t				srcs[] = { dst, src };
+	size_t				srcs[] = { dst, src, 0 };
+	size_t				tot_len;
+	t_bytes *			barr;
+	size_t				src_len;
 
-	// TODO:  attempt to reuse the buffer!
+	tot_len = get_cat_src_len( catcher, a_stack, srcs);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, dst);
 
-	return bzb_concat( catcher, a_stack, srcs);
+	// TODO:  alloc a new buffer when too small
+        assert( tot_len < barr->alloc);
+        bzb_ref( catcher, *a_stack, dst);  // caller will deref, in case new
+
+        src_len = bzb_size( catcher, *a_stack, src);
+        memcpy( &( barr->data[ barr->len ]),
+                bzb_to_asciiz( catcher, *a_stack, src), src_len);
+        barr->len += src_len;
+
+	return dst;
 	}  // _________________________________________________________
 
 /**
