@@ -278,6 +278,60 @@ void					test_byte_array( void)
 	}  // _________________________________________________________
 
 /**
+ * Helper routine to test byte array concatenation.
+ */
+static
+void					help_test_ba_concat
+	(
+	t_stack * *			stack,			// stack from which to allocate
+	size_t				in_dst			// the byte array to be appended to
+	)
+	{
+	const
+	char *				CAT_RESULT = "cha, cha, cha";
+
+	size_t				dst;
+	size_t				src;
+	size_t				src2;
+	int					cnt;
+	size_t				result;
+
+	dst = in_dst ?
+			in_dst :
+			bzb_init_size( NULL, stack, strlen( CAT_RESULT) );
+	src = bzb_from_asciiz( NULL, stack, "cha");
+	src2 = bzb_from_asciiz( NULL, stack, ", ");
+	for ( cnt = 1; ; cnt++)
+
+		{
+		result = bzb_concat_to( NULL, stack, dst, src);
+		assert( result == dst);  // *not* moved / expanded
+		bzb_deref( NULL, *stack, dst);  // code as if no-move not known
+		dst = result;
+		if ( cnt >= 3)
+			{
+			break;  // === stop ===
+			}  // done?
+
+		result = bzb_concat_to( NULL, stack, dst, src2);
+		if ( ! in_dst)
+			{
+			assert( result == dst);  // *not* moved / expanded
+			}  // had to make exact-fit buffer?
+		// else:  we were given a small buffer
+		bzb_deref( NULL, *stack, dst);  // code as if no-move not known
+		dst = result;
+		}  // add each "cha" to output
+
+	assert( memcmp( CAT_RESULT,
+			bzb_to_asciiz( NULL, *stack, dst),
+			bzb_size( NULL, *stack, dst) ) == 0);
+	bzb_deref( NULL, *stack, src);
+	bzb_deref( NULL, *stack, src2);
+	bzb_deref( NULL, *stack, dst);
+	}  // _________________________________________________________
+
+/**
  * Test byte array update functionality
  */
 static
@@ -291,56 +345,25 @@ void					test_mutable_byte_array( void)
 	const
 	char *				SIMPLE_SPLICE = "Hello, Wayne's world";
 */
-	const
-	char *				CAT_RESULT = "cha, cha, cha";
 
 	t_stack *			stack;
 	size_t				empty_top;
 	size_t				dst;
-	size_t				src;
-	size_t				src2;
-	int					cnt;
-	size_t				result;
 
 	puts( "\nTest mutable byte array use"); fflush( stdout);
 
 	stack = bza_cons_stack( NULL);
 	empty_top = stack->top;
 
-	// TODO: concatenate to existing too-small buffer
-
 	// concatenate to existing largish buffer
 
-	dst = bzb_init_size( NULL, &stack, strlen( CAT_RESULT) );
-	src = bzb_from_asciiz( NULL, &stack, "cha");
-	src2 = bzb_from_asciiz( NULL, &stack, ", ");
+	help_test_ba_concat( &stack, 0);
+	assert( stack->top == empty_top);
 
-	for ( cnt = 1; ; cnt++)
+	// concatenate to existing too-small buffer
 
-		{
-		result = bzb_concat_to( NULL, &stack, dst, src);
-		assert( result == dst);  // *not* moved / expanded
-		bzb_deref( NULL, stack, dst);  // code as if no-move not known
-		dst = result;
-
-		if ( cnt >= 3)
-			{
-			break;  // === stop ===
-			}  // done?
-
-		result = bzb_concat_to( NULL, &stack, dst, src2);
-		assert( result == dst);  // *not* moved / expanded
-		bzb_deref( NULL, stack, dst);  // code as if no-move not known
-		dst = result;
-		}  // add each "cha" to output
-
-	assert( memcmp( CAT_RESULT,
-			bzb_to_asciiz( NULL, stack, dst),
-			bzb_size( NULL, stack, dst) ) == 0);
-	bzb_deref( NULL, stack, src);
-	bzb_deref( NULL, stack, src2);
-	bzb_deref( NULL, stack, dst);
-
+	dst = bzb_init_size( NULL, &stack, 0);
+	help_test_ba_concat( &stack, dst);
 	assert( stack->top == empty_top);
 
 	// expand and relocate case:
