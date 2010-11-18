@@ -11,7 +11,7 @@
 #else
 	#define MLOG_PUTS( s) /* */
 
-	#define MLOG_PRINTF( moot)	//
+	#define MLOG_PRINTF(...)		//
 #endif  // DO_LOG defined?
 
 // *** EOF ***

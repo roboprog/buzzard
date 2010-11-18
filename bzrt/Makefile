@@ -3,7 +3,8 @@
 
 CFLAGS = -g -Wall
 
-HEADERS = src/bzrt_alloc.h	\
+HEADERS = src/_log.h	\
+		src/bzrt_alloc.h	\
 		src/bzrt_bytes.h
 
 OBJECTS = bin/bzrt_alloc.o	\
