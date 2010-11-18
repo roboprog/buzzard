@@ -30,7 +30,7 @@ size_t					bzb_init_size
 	t_stack * *			a_stack,		// a stack on/in which to
 										// allocate the frame
 										// (which may be relocated!)
-	size_t				size			// initial size of buffer
+	size_t				size			// initial usable size of buffer
 	)
 	;
 

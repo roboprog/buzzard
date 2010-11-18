@@ -70,7 +70,7 @@ size_t					bzb_from_asciiz
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = str_len;
-	barr->alloc = str_len + 1;
+	barr->alloc = str_len + 1;  // TODO: reuse size in container
 	strcpy( barr->data, src);
 	return bytes;
 	}  // _________________________________________________________
@@ -82,7 +82,7 @@ size_t					bzb_init_size
 	t_stack * *			a_stack,		// a stack on/in which to
 										// allocate the frame
 										// (which may be relocated!)
-	size_t				size			// initial size of buffer
+	size_t				size			// initial usable size of buffer
 	)
 	{
 	size_t				alloc_len;
@@ -91,13 +91,11 @@ size_t					bzb_init_size
 
 	MLOG_PRINTF( stderr, "*** B-A: reserved size %d\n", (int) size);
 
-	assert( size > 0);
-
-	alloc_len = sizeof( t_bytes) + size;
+	alloc_len = sizeof( t_bytes) + ( size + 1);
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = 0;
-	barr->alloc = size;
+	barr->alloc = ( size + 1);  // TODO: reuse size in container
 	barr->data[ 0 ] = '\0';
 	return bytes;
 	}  // _________________________________________________________
@@ -188,7 +186,7 @@ size_t					bzb_subarray
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = eff_len;
-	barr->alloc = eff_len + 1;
+	barr->alloc = eff_len + 1;  // TODO: reuse size in container
 	dptr = &( barr->data[ 0 ]);
 	sptr = bzb_to_asciiz( catcher, *a_stack, src);  // just get the pointer
 	// TODO: tune this tight
@@ -258,7 +256,7 @@ size_t					bzb_concat
 	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
 	barr->len = src_len;
-	barr->alloc = src_len + 1;
+	barr->alloc = src_len + 1;  // TODO: reuse size in container
 	dptr = &( barr->data[ 0 ]);
 	for ( src_ptr = srcs; *src_ptr; src_ptr++)
 
@@ -294,13 +292,13 @@ size_t					bzb_concat_to
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, dst);
 
 	// TODO:  alloc a new buffer when too small
-        assert( tot_len < barr->alloc);
-        bzb_ref( catcher, *a_stack, dst);  // caller will deref, in case new
+	assert( tot_len < barr->alloc);
+	bzb_ref( catcher, *a_stack, dst);  // caller will deref, in case new
 
-        src_len = bzb_size( catcher, *a_stack, src);
-        memcpy( &( barr->data[ barr->len ]),
-                bzb_to_asciiz( catcher, *a_stack, src), src_len);
-        barr->len += src_len;
+	src_len = bzb_size( catcher, *a_stack, src);
+	memcpy( &( barr->data[ barr->len ]),
+			bzb_to_asciiz( catcher, *a_stack, src), src_len);
+	barr->len += src_len;
 
 	return dst;
 	}  // _________________________________________________________

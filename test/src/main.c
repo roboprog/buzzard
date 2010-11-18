@@ -311,7 +311,7 @@ void					test_mutable_byte_array( void)
 
 	// concatenate to existing largish buffer
 
-	dst = bzb_init_size( NULL, &stack, strlen( CAT_RESULT) + 1);
+	dst = bzb_init_size( NULL, &stack, strlen( CAT_RESULT) );
 	src = bzb_from_asciiz( NULL, &stack, "cha");
 	src2 = bzb_from_asciiz( NULL, &stack, ", ");
 
