@@ -31,7 +31,7 @@
 
 #include "bzrt_bytes.h"
 
-#define DO_LOG	1
+// #define DO_LOG	1
 #include "_log.h"
 
 /** data structure to manage byte array */

@@ -1,7 +1,8 @@
 # make file for buzzard library
 # $Id: $
 
-CFLAGS = -g -Wall
+# CFLAGS = -g -Wall
+CFLAGS = -O3 -Wall
 
 HEADERS = src/_log.h	\
 		src/bzrt_alloc.h	\
