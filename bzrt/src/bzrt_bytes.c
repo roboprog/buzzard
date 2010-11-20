@@ -286,21 +286,39 @@ size_t					bzb_concat_to
 	size_t				srcs[] = { dst, src, 0 };
 	size_t				tot_len;
 	t_bytes *			barr;
+	size_t				new_dst;
 	size_t				src_len;
 
 	tot_len = get_cat_src_len( catcher, a_stack, srcs);
 	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, dst);
 
-	// TODO:  alloc a new buffer when too small
-	assert( tot_len < barr->alloc);
-	bzb_ref( catcher, *a_stack, dst);  // caller will deref, in case new
+	if ( tot_len < barr->alloc)
+		{
+		// "un-discard" the original, which we are reusing
+		bzb_ref( catcher, *a_stack,
+				( new_dst = dst) );
+		}  // enough space in current buffer?
+	else
+		{
+		// add 50% to needed size
+		new_dst = bzb_init_size( catcher, a_stack,
+				( tot_len + ( tot_len >> 1) ) );
+
+		// copy existing bytes
+		barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, new_dst);
+		src_len = bzb_size( catcher, *a_stack, dst);
+		memcpy( barr->data,
+				bzb_to_asciiz( catcher, *a_stack, dst), src_len);
+		barr->len = src_len;
+		}  // outgrew current buffer?
 
 	src_len = bzb_size( catcher, *a_stack, src);
 	memcpy( &( barr->data[ barr->len ]),
 			bzb_to_asciiz( catcher, *a_stack, src), src_len);
 	barr->len += src_len;
+	barr->data[ barr->len ] = '\0';
 
-	return dst;
+	return new_dst;
 	}  // _________________________________________________________
 
 /**

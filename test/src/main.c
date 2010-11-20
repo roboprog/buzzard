@@ -305,7 +305,6 @@ void					help_test_ba_concat
 
 		{
 		result = bzb_concat_to( NULL, stack, dst, src);
-		assert( result == dst);  // *not* moved / expanded
 		bzb_deref( NULL, *stack, dst);  // code as if no-move not known
 		dst = result;
 		if ( cnt >= 3)
@@ -314,15 +313,15 @@ void					help_test_ba_concat
 			}  // done?
 
 		result = bzb_concat_to( NULL, stack, dst, src2);
-		if ( ! in_dst)
-			{
-			assert( result == dst);  // *not* moved / expanded
-			}  // had to make exact-fit buffer?
-		// else:  we were given a small buffer
 		bzb_deref( NULL, *stack, dst);  // code as if no-move not known
 		dst = result;
 		}  // add each "cha" to output
 
+	if ( ! in_dst)
+		{
+		assert( result == dst);  // *not* moved / expanded
+		}  // had to make exact-fit buffer?
+	// else:  we were given a small buffer
 	assert( memcmp( CAT_RESULT,
 			bzb_to_asciiz( NULL, *stack, dst),
 			bzb_size( NULL, *stack, dst) ) == 0);
