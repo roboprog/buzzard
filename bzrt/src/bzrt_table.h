@@ -87,7 +87,6 @@ size_t					bzt_get
 	)
 	;
 
-size_t
 
 #endif  // BZRT_TABLE_H
 

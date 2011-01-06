@@ -30,6 +30,7 @@
 
 #include "bzrt_alloc.h"
 #include "bzrt_bytes.h"
+#include "bzrt_table.h"
 
 /**
  * Test (very basic) stack creation / destruction.
@@ -422,6 +423,15 @@ void					test_mutable_byte_array( void)
 	}  // _________________________________________________________
 
 /**
+ * Test key-table store/lookup code.
+ */
+static
+void					test_table_access( void)
+	{
+	// TODO
+	}  // _________________________________________________________
+
+/**
  * Drive tests.
  * TODO: xunit or something like that (but exit-on-failure for now)
  */
@@ -438,6 +448,8 @@ int						main
 	test_byte_array();
 	test_mutable_byte_array();
 
+	test_table_access();
+
 	// TODO: basic I/O
 
 	// TODO: reference frame management
@@ -445,6 +457,8 @@ int						main
 	// TODO: task messaging
 
 	// TODO: thread as task
+
+	// TODO: symbol table lookup and execute
 
 	puts( "\n\nNO FATAL ERRORS, ALL GOOD!");
 
