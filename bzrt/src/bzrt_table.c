@@ -58,6 +58,27 @@ void					bzt_deref
 	// TODO
 	}  // _________________________________________________________
 
+/**
+ * Return any value (byte-array containing the value),
+ *  matching the given key.
+ * */
+size_t					bzt_get
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack *			a_stack,		// a stack on/in which to
+										// allocate the frame(s)
+	const
+	char *				key,			// key data bytes  --
+										//  MUST BE "IMMOVABLE"
+										//  for the duration of this call
+										//  (should not be in given stack)
+										//  a copy will be saved at completion
+	size_t				key_len			// sizeof key
+	)
+	{
+	return 0;  // TODO
+	}  // _________________________________________________________
+
 
 // vi: ts=4 sw=4 ai
 // *** EOF ***

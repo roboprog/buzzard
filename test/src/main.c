@@ -428,15 +428,31 @@ void					test_mutable_byte_array( void)
 static
 void					test_table_access( void)
 	{
+	const
+	char *				SOME_KEY = "random bytes";
+	const
+	char *				SOME_VAL = "arbitrary result";
+
 	t_stack *			stack;
 	size_t				empty_top;
 	size_t				table;
+	size_t				search_res_ba;
+	size_t				prev_ba;
 
 	puts( "\nTest lookup table use"); fflush( stdout);
 
 	stack = bza_cons_stack( NULL);
 	empty_top = stack->top;
 	table = bzt_init( NULL, &stack);
+
+	// make sure that we don't find anything when nothing is there:
+
+	search_res_ba = bzt_get( NULL, stack, SOME_KEY, strlen( SOME_KEY) );
+	assert( search_res_ba == 0);
+
+	// TODO:  save something and get it back
+
+	// TODO:  save multiple items, check for hit/miss
 
 	bzt_deref( NULL, stack, table);
 	assert( stack->top == empty_top);
