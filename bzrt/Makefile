@@ -10,7 +10,8 @@ HEADERS = src/_log.h	\
 		src/bzrt_table.h
 
 OBJECTS = bin/bzrt_alloc.o	\
-		bin/bzrt_bytes.o
+		bin/bzrt_bytes.o	\
+		bin/bzrt_table.o
 
 bin/libbzrt.a: $(OBJECTS)
 	(cd bin ; ar -rc libbzrt.a *.o )
@@ -23,6 +24,9 @@ bin/bzrt_alloc.o:	src/bzrt_alloc.c $(HEADERS)
 
 bin/bzrt_bytes.o:	src/bzrt_bytes.c $(HEADERS)
 	$(CC) $(CFLAGS) src/bzrt_bytes.c -c -o bin/bzrt_bytes.o
+
+bin/bzrt_table.o:	src/bzrt_table.c $(HEADERS)
+	$(CC) $(CFLAGS) src/bzrt_table.c -c -o bin/bzrt_table.o
 
 
 # vi: ts=4 sw=4 ai
