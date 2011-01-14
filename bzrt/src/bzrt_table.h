@@ -51,6 +51,7 @@ size_t					bzt_put
 	t_stack * *			a_stack,		// a stack on/in which to
 										// allocate the frame(s)
 										// (which may be relocated!)
+	size_t				table,			// offset of lookup table
 	const
 	char *				key,			// key data bytes  --
 										//  MUST BE "IMMOVABLE"
@@ -77,6 +78,7 @@ size_t					bzt_get
 	jmp_buf *			catcher,		// error handler (or null for immediate death)
 	t_stack *			a_stack,		// a stack on/in which to
 										// allocate the frame(s)
+	size_t				table,			// offset of lookup table
 	const
 	char *				key,			// key data bytes  --
 										//  MUST BE "IMMOVABLE"

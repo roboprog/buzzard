@@ -447,10 +447,18 @@ void					test_table_access( void)
 
 	// make sure that we don't find anything when nothing is there:
 
-	search_res_ba = bzt_get( NULL, stack, SOME_KEY, strlen( SOME_KEY) );
+	search_res_ba = bzt_get( NULL, stack, table,
+			SOME_KEY, strlen( SOME_KEY) );
 	assert( search_res_ba == 0);
 
-	// TODO:  save something and get it back
+	// save something and get it back
+
+	bzt_put( NULL, &stack, table,
+			SOME_KEY, strlen( SOME_KEY), SOME_VAL, strlen( SOME_VAL) );
+	search_res_ba = bzt_get( NULL, stack, table,
+			SOME_KEY, strlen( SOME_KEY) );
+	assert( search_res_ba != 0);
+	// TODO: compare the bytes in the resulting value
 
 	// TODO:  save multiple items, check for hit/miss
 
