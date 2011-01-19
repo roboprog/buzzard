@@ -88,6 +88,16 @@ void					bza_deref_stk_frame
 	)
 	;
 
+/** return the reference count of the indicated block */
+int						bza_get_ref_count
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack *			a_stack,		// a stack on/in which 
+										// the frame is allocated
+	size_t				stk_frame_off	// offset of stack frame
+	)
+	;
+
 /**
  * return a pointer to the payload data in the indicated frame.
  *  WARNING:  the data may be relocated by a subsequent allocation,

@@ -66,7 +66,17 @@ void					bzt_deref
 	size_t				table			// offset of lookup table
 	)
 	{
-	// TODO:  check for 1 -> 0 transition, release contents
+	t_table *			innards;
+
+	// check for 1 -> 0 transition, release contents
+	if ( bza_get_ref_count( catcher, a_stack, table) == 1)
+		{
+		// TODO: recursive deallocation of multiple values
+		innards = (t_table *) bza_get_frame_ptr( catcher, a_stack, table);
+		bzb_deref( catcher, a_stack, innards->val_off);
+		}  // final reference dropping away?
+	// else:  another reference is pending
+
 	bza_deref_stk_frame( catcher, a_stack, table);
 	}  // _________________________________________________________
 

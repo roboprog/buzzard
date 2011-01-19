@@ -388,6 +388,28 @@ void					bza_deref_stk_frame
 	bza_dump_stack( a_stack);  // TEMP
 	}  // _________________________________________________________
 
+/** return the reference count of the indicated block */
+int						bza_get_ref_count
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack *			a_stack,		// a stack on/in which 
+										// the frame is allocated
+	size_t				stk_frame_off	// offset of stack frame
+	)
+	{
+	t_frame_marker *	marker;
+	int					cnt;
+
+	// TODO: better error handling
+	assert( a_stack != NULL);
+	MLOG_PRINTF( stderr, "*** STK: ref-cnt frame off %d\n", (int) stk_frame_off);  // TEMP
+
+	marker = bza_get_frame_marker( a_stack, stk_frame_off);
+	cnt = marker->ref_cnt;
+	MLOG_PRINTF( stderr, "    ref-cnt %d\n", cnt);
+	return cnt;
+	}  // _________________________________________________________
+
 /**
  * return a pointer to the payload data in the indicated frame.
  *  WARNING:  the data may be relocated by a subsequent allocation,
