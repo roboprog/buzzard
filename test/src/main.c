@@ -458,7 +458,9 @@ void					test_table_access( void)
 	search_res_ba = bzt_get( NULL, stack, table,
 			SOME_KEY, strlen( SOME_KEY) );
 	assert( search_res_ba != 0);
-	// TODO: compare the bytes in the resulting value
+	assert( memcmp( SOME_VAL,
+			bzb_to_asciiz( NULL, stack, search_res_ba),
+			bzb_size( NULL, stack, search_res_ba) ) == 0);
 
 	// TODO:  save multiple items, check for hit/miss
 
