@@ -432,12 +432,15 @@ void					test_table_access( void)
 	char *				SOME_KEY = "random bytes";
 	const
 	char *				SOME_VAL = "arbitrary result";
+	const
+	char *				ANOTHER_KEY = "more random bytes";
+	const
+	char *				ANOTHER_VAL = "another arbitrary result";
 
 	t_stack *			stack;
 	size_t				empty_top;
 	size_t				table;
 	size_t				search_res_ba;
-	size_t				prev_ba;
 
 	puts( "\nTest lookup table use"); fflush( stdout);
 
@@ -461,6 +464,12 @@ void					test_table_access( void)
 	assert( memcmp( SOME_VAL,
 			bzb_to_asciiz( NULL, stack, search_res_ba),
 			bzb_size( NULL, stack, search_res_ba) ) == 0);
+
+	// check for miss
+
+	search_res_ba = bzt_get( NULL, stack, table,
+			ANOTHER_KEY, strlen( ANOTHER_KEY) );
+	assert( search_res_ba == 0);
 
 	// TODO:  save multiple items, check for hit/miss
 

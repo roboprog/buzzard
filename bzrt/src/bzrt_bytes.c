@@ -75,6 +75,39 @@ size_t					bzb_from_asciiz
 	return bytes;
 	}  // _________________________________________________________
 
+/** create a (mutable) byte array from a sized memory buffer, return offset */
+size_t					bzb_from_fixed_mem
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	const
+	char *				val,			// value data bytes  --
+										//  MUST BE "IMMOVABLE"
+										//  for the duration of this call
+										//  (should not be in given stack)
+										//  a copy will be saved at completion
+	size_t				val_len			// sizeof val
+	)
+	{
+	size_t				alloc_len;
+	size_t				bytes;
+	t_bytes *			barr;
+
+	assert( val != NULL);
+	MLOG_PRINTF( stderr, "*** B-A: from fixed mem \"%d b at %d\"\n", val_len, ( (int) val) );
+
+	alloc_len = sizeof( t_bytes) + val_len + 1;
+	bytes = bza_cons_stk_frame( catcher, a_stack, alloc_len);
+	barr = (t_bytes *) bza_get_frame_ptr( catcher, *a_stack, bytes);
+	barr->len = val_len;
+	barr->alloc = val_len + 1;  // TODO: reuse size in container
+	memcpy( barr->data, val, val_len);
+	barr->data[ val_len ] = '\0';
+	return bytes;
+	}  // _________________________________________________________
+
 /** create a (mutable) byte array buffer with an initial size */
 size_t					bzb_init_size
 	(

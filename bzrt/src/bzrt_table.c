@@ -36,6 +36,7 @@
 
 typedef struct			t_table
 	{
+	size_t				key_off;		// TODO: real tracking info
 	size_t				val_off;		// TODO: real tracking info
 	}					t_table;
 
@@ -53,6 +54,7 @@ size_t					bzt_init
 
 	table = bza_cons_stk_frame( catcher, a_stack, sizeof( t_table) );
 	innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
+	innards->key_off = 0;  // TODO:  real state tracking
 	innards->val_off = 0;  // TODO:  real state tracking
 	return table;
 	}  // _________________________________________________________
@@ -72,7 +74,9 @@ void					bzt_deref
 	if ( bza_get_ref_count( catcher, a_stack, table) == 1)
 		{
 		// TODO: recursive deallocation of multiple values
+		// TODO:  check for nothing in fact stored (likely handled by real implementation anyway, unlike placholder)
 		innards = (t_table *) bza_get_frame_ptr( catcher, a_stack, table);
+		bzb_deref( catcher, a_stack, innards->key_off);
 		bzb_deref( catcher, a_stack, innards->val_off);
 		}  // final reference dropping away?
 	// else:  another reference is pending
@@ -81,10 +85,9 @@ void					bzt_deref
 	}  // _________________________________________________________
 
 /**
- * Save a key-value pair in the table,
- * return any previous value (byte-array containing the value)
+ * Save a key-value pair in the table.
  * */
-size_t					bzt_put
+void					bzt_put
 	(
 	jmp_buf *			catcher,		// error handler (or null for immediate death)
 	t_stack * *			a_stack,		// a stack on/in which to
@@ -112,16 +115,11 @@ size_t					bzt_put
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
 	prev_val = innards->val_off;  // TODO: real source for value
+	// TODO: dereference prev_val
 
 	// TODO: dereference any old value
-	// TODO: decide how to make caller dereference pending old value???
 
-	// TODO: create a single routine in bzrt_bytes to do memcpy init
-	innards->val_off = bzb_init_size( catcher, a_stack, val_len);
-	memcpy( ( (char *) bzb_to_asciiz( catcher, *a_stack, innards->val_off) ),
-			val, val_len);
-
-	return prev_val;
+	innards->val_off = bzb_from_fixed_mem( catcher, a_stack, val, val_len);
 	}  // _________________________________________________________
 
 /**

@@ -42,10 +42,9 @@ void					bzt_deref
 	;
 
 /**
- * Save a key-value pair in the table,
- * return any previous value (byte-array containing the value)
+ * Save a key-value pair in the table.
  * */
-size_t					bzt_put
+void					bzt_put
 	(
 	jmp_buf *			catcher,		// error handler (or null for immediate death)
 	t_stack * *			a_stack,		// a stack on/in which to

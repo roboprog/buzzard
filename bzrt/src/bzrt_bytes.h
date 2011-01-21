@@ -23,6 +23,23 @@ size_t					bzb_from_asciiz
 	)
 	;
 
+/** create a (mutable) byte array from a sized memory buffer, return offset */
+size_t					bzb_from_fixed_mem
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame
+										// (which may be relocated!)
+	const
+	char *				val,			// value data bytes  --
+										//  MUST BE "IMMOVABLE"
+										//  for the duration of this call
+										//  (should not be in given stack)
+										//  a copy will be saved at completion
+	size_t				val_len			// sizeof val
+	)
+	;
+
 /** create a (mutable) byte array buffer with an initial size */
 size_t					bzb_init_size
 	(
