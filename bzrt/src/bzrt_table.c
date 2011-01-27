@@ -115,10 +115,13 @@ void					bzt_put
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
 	prev_val = innards->val_off;  // TODO: real source for value
-	// TODO: dereference prev_val
 
+	// TODO: dereference prev_val
 	// TODO: dereference any old value
 
+	// TODO: trie/tree
+
+	innards->key_off = bzb_from_fixed_mem( catcher, a_stack, key, key_len);
 	innards->val_off = bzb_from_fixed_mem( catcher, a_stack, val, val_len);
 	}  // _________________________________________________________
 
@@ -142,9 +145,28 @@ size_t					bzt_get
 	)
 	{
 	t_table *			innards;
+	size_t				cur_key_len;
+	size_t				val_off;
+
+	// TODO: trie/tree
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, a_stack, table);
-	return innards->val_off;
+	if ( ! innards->key_off)
+		{
+		return 0;  // === done ===
+		}  // nothing stored yet?
+
+	cur_key_len = bzb_size( catcher, a_stack, innards->key_off);
+	if ( key_len != cur_key_len)
+		{
+		return 0;  // === done ===
+		}  // different length key?
+
+	val_off = ( memcmp( key, 
+				bzb_to_asciiz( catcher, a_stack, innards->key_off),
+				cur_key_len) == 0) ?
+			innards->val_off : 0;
+	return val_off;
 	}  // _________________________________________________________
 
 
