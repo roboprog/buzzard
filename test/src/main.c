@@ -471,7 +471,24 @@ void					test_table_access( void)
 			ANOTHER_KEY, strlen( ANOTHER_KEY) );
 	assert( search_res_ba == 0);
 
-	// TODO:  save multiple items, check for hit/miss
+	// save multiple items, check for hit/miss
+
+	bzt_put( NULL, &stack, table,
+			ANOTHER_KEY, strlen( ANOTHER_KEY), ANOTHER_VAL, strlen( ANOTHER_VAL) );
+	search_res_ba = bzt_get( NULL, stack, table,
+			ANOTHER_KEY, strlen( ANOTHER_KEY) );
+	assert( search_res_ba != 0);
+	assert( memcmp( ANOTHER_VAL,
+			bzb_to_asciiz( NULL, stack, search_res_ba),
+			bzb_size( NULL, stack, search_res_ba) ) == 0);
+	search_res_ba = bzt_get( NULL, stack, table,
+			SOME_KEY, strlen( SOME_KEY) );
+	assert( search_res_ba != 0);
+	assert( memcmp( SOME_VAL,
+			bzb_to_asciiz( NULL, stack, search_res_ba),
+			bzb_size( NULL, stack, search_res_ba) ) == 0);
+
+	// cleanup
 
 	bzt_deref( NULL, stack, table);
 	assert( stack->top == empty_top);
