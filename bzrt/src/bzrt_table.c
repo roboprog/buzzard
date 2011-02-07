@@ -34,10 +34,33 @@
 // #define DO_LOG	1
 #include "_log.h"
 
+/** leaf:  remainder of byte array, with value, are all here */
+typedef struct			t_table_leaf
+	{
+	size_t				key_off;		// (remainder of) key byte array
+	size_t				val_off;		// value byte array
+	}					t_table_leaf;
+
+/** interior:  interior node at level with more than one possible value */
+typedef struct			t_table_interior
+	{
+	size_t				byte_val_nodes;	// variable size array of t_table
+										//  entries, indexed by 0..255
+										//  byte value for currrent position
+	}					t_table_interior;
+
+/** recursive data structure to interior nodes and leaves. */
 typedef struct			t_table
 	{
-	size_t				key_off;		// TODO: real tracking info
-	size_t				val_off;		// TODO: real tracking info
+	int					is_leaf;		// true if node in table
+										//  (modified trie) is a leaf.
+										//  (discriminant for following union)
+	union				t_td
+		{
+		t_table_leaf	leaf;			// leaf type data
+		t_table_interior
+						interior;		// interior node data (array)
+		}				td;				// table data node (union)
 	}					t_table;
 
 /** Create an empty table (return offset). */
@@ -54,8 +77,9 @@ size_t					bzt_init
 
 	table = bza_cons_stk_frame( catcher, a_stack, sizeof( t_table) );
 	innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
-	innards->key_off = 0;  // TODO:  real state tracking
-	innards->val_off = 0;  // TODO:  real state tracking
+	innards->is_leaf = 1;
+	innards->td.leaf.key_off = 0;
+	innards->td.leaf.val_off = 0;
 	return table;
 	}  // _________________________________________________________
 
@@ -76,8 +100,8 @@ void					bzt_deref
 		// TODO: recursive deallocation of multiple values
 		// TODO:  check for nothing in fact stored (likely handled by real implementation anyway, unlike placholder)
 		innards = (t_table *) bza_get_frame_ptr( catcher, a_stack, table);
-		bzb_deref( catcher, a_stack, innards->key_off);
-		bzb_deref( catcher, a_stack, innards->val_off);
+		bzb_deref( catcher, a_stack, innards->td.leaf.key_off);
+		bzb_deref( catcher, a_stack, innards->td.leaf.val_off);
 		}  // final reference dropping away?
 	// else:  another reference is pending
 
@@ -114,15 +138,15 @@ void					bzt_put
 	size_t				prev_val;
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
-	prev_val = innards->val_off;  // TODO: real source for value
+	prev_val = innards->td.leaf.val_off;  // TODO: real source for value
 
 	// TODO: dereference prev_val
 	// TODO: dereference any old value
 
 	// TODO: trie/tree
 
-	innards->key_off = bzb_from_fixed_mem( catcher, a_stack, key, key_len);
-	innards->val_off = bzb_from_fixed_mem( catcher, a_stack, val, val_len);
+	innards->td.leaf.key_off = bzb_from_fixed_mem( catcher, a_stack, key, key_len);
+	innards->td.leaf.val_off = bzb_from_fixed_mem( catcher, a_stack, val, val_len);
 	}  // _________________________________________________________
 
 /**
@@ -151,21 +175,21 @@ size_t					bzt_get
 	// TODO: trie/tree
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, a_stack, table);
-	if ( ! innards->key_off)
+	if ( ! innards->td.leaf.key_off)
 		{
 		return 0;  // === done ===
 		}  // nothing stored yet?
 
-	cur_key_len = bzb_size( catcher, a_stack, innards->key_off);
+	cur_key_len = bzb_size( catcher, a_stack, innards->td.leaf.key_off);
 	if ( key_len != cur_key_len)
 		{
 		return 0;  // === done ===
 		}  // different length key?
 
 	val_off = ( memcmp( key, 
-				bzb_to_asciiz( catcher, a_stack, innards->key_off),
+				bzb_to_asciiz( catcher, a_stack, innards->td.leaf.key_off),
 				cur_key_len) == 0) ?
-			innards->val_off : 0;
+			innards->td.leaf.val_off : 0;
 	return val_off;
 	}  // _________________________________________________________
 
