@@ -151,6 +151,67 @@ void					bzt_put
 
 /**
  * Return any value (byte-array containing the value),
+ *  matching the given key, from a leaf node in modified trie.
+ */
+static
+size_t					bzt_get_leaf
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack *			a_stack,		// a stack on/in which to
+										// allocate the frame(s)
+	t_table *			innards,		// current node in trie
+										//  IMMOVABLE for duration of call
+	const
+	char *				key,			// (remainder of) key data bytes  --
+										//  MUST BE "IMMOVABLE"
+										//  for the duration of this call
+										//  (should not be in given stack)
+										//  a copy will be saved at completion
+	size_t				key_len			// sizeof key (remainder)
+	)
+	{
+	size_t				cur_key_len;
+	size_t				val_off;
+
+	if ( ! innards->td.leaf.key_off)
+		{
+		return 0;  // === done ===
+		}  // nothing stored yet?
+
+	cur_key_len = bzb_size( catcher, a_stack, innards->td.leaf.key_off);
+	if ( key_len != cur_key_len)
+		{
+		return 0;  // === done ===
+		}  // different length key?
+
+	val_off = ( memcmp( key, 
+				bzb_to_asciiz( catcher, a_stack, innards->td.leaf.key_off),
+				cur_key_len) == 0) ?
+			innards->td.leaf.val_off : 0;
+	return val_off;
+	}  // _________________________________________________________
+
+/**
+ * Return the offset of the data for the next node in the (modified) trie,
+ *  based on the current byte value of the key.
+ */
+static
+size_t					bzt_get_interior
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack *			a_stack,		// a stack on/in which to
+										// allocate the frame(s)
+	t_table *			innards,		// current node in trie
+										//  IMMOVABLE for duration of call
+	char 				key_byte		// current byte from key
+										//  to be considered for a match
+	)
+	{
+	return 0;  // TODO
+	}  // _________________________________________________________
+
+/**
+ * Return any value (byte-array containing the value),
  *  matching the given key.
  * */
 size_t					bzt_get
@@ -169,28 +230,28 @@ size_t					bzt_get
 	)
 	{
 	t_table *			innards;
-	size_t				cur_key_len;
-	size_t				val_off;
-
-	// TODO: trie/tree
+	size_t				next_level;
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, a_stack, table);
-	if ( ! innards->td.leaf.key_off)
+	if ( innards->is_leaf)
 		{
-		return 0;  // === done ===
-		}  // nothing stored yet?
+		return bzt_get_leaf( catcher, a_stack, innards, key, key_len);
+		// === done ===
+		}  // leaf node?
 
-	cur_key_len = bzb_size( catcher, a_stack, innards->td.leaf.key_off);
-	if ( key_len != cur_key_len)
+	// TODO: fixme - key may be consumed on prior levels!
+	if ( key_len == 0)
 		{
-		return 0;  // === done ===
-		}  // different length key?
+		return 0;  // === fail ===
+		}  // no key data?
 
-	val_off = ( memcmp( key, 
-				bzb_to_asciiz( catcher, a_stack, innards->td.leaf.key_off),
-				cur_key_len) == 0) ?
-			innards->td.leaf.val_off : 0;
-	return val_off;
+	next_level = bzt_get_interior( catcher, a_stack, innards, key[ 0 ]);
+	if ( ! next_level)
+		{
+		return 0;  // === fail ===
+		}  // no partial match for current byte?
+
+	return 0;  // === fail ===
 	}  // _________________________________________________________
 
 
