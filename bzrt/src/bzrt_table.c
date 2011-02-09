@@ -207,7 +207,22 @@ size_t					bzt_get_interior
 										//  to be considered for a match
 	)
 	{
-	return 0;  // TODO
+	size_t				byte_val_nodes;
+	int					num_nodes;
+	int					node_idx;
+	size_t *			nodes;
+
+	byte_val_nodes = innards->td.interior.byte_val_nodes;
+	num_nodes = ( bzb_size( catcher, a_stack, byte_val_nodes) /
+			sizeof( size_t) );
+	node_idx = ( (int) ( (unsigned char) key_byte) );
+	if ( node_idx >= num_nodes)
+		{
+		return 0;  // === fail ===
+		}  // no value defined for this byte (position)?
+
+	nodes = (size_t *) bzb_to_asciiz( catcher, a_stack, byte_val_nodes);
+	return nodes[ node_idx ];
 	}  // _________________________________________________________
 
 /**
