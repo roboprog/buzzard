@@ -109,6 +109,45 @@ void					bzt_deref
 	}  // _________________________________________________________
 
 /**
+ * Save a key-value pair in an empty (leaf) level in the table.
+ * */
+static
+void					bzt_put_leaf
+	(
+	jmp_buf *			catcher,		// error handler (or null for immediate death)
+	t_stack * *			a_stack,		// a stack on/in which to
+										// allocate the frame(s)
+										// (which may be relocated!)
+	t_table *			innards,		// current node in trie
+										//  IMMOVABLE for duration of call
+	const
+	char *				key,			// key data bytes  --
+										//  MUST BE "IMMOVABLE"
+										//  for the duration of this call
+										//  (should not be in given stack)
+										//  a copy will be saved at completion
+	size_t				key_len,		// sizeof key
+	const
+	char *				val,			// value data bytes  --
+										//  MUST BE "IMMOVABLE"
+										//  for the duration of this call
+										//  (should not be in given stack)
+										//  a copy will be saved at completion
+	size_t				val_len			// sizeof val
+	)
+	{
+	size_t				prev_val;
+
+	prev_val = innards->td.leaf.val_off;
+
+	// TODO: dereference prev_val
+	// TODO: dereference any old value
+
+	innards->td.leaf.key_off = bzb_from_fixed_mem( catcher, a_stack, key, key_len);
+	innards->td.leaf.val_off = bzb_from_fixed_mem( catcher, a_stack, val, val_len);
+	}  // _________________________________________________________
+
+/**
  * Save a key-value pair in the table.
  * */
 void					bzt_put
@@ -135,18 +174,35 @@ void					bzt_put
 	)
 	{
 	t_table *			innards;
-	size_t				prev_val;
+	size_t				cur_key_len;
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
-	prev_val = innards->td.leaf.val_off;  // TODO: real source for value
+	if ( ( innards->is_leaf) &&
+		 ( innards->td.leaf.key_off == 0) )
+		{
+		bzt_put_leaf( catcher, a_stack, innards, key, key_len, val, val_len);
+		return;  // === done ===
+		}  // empty leaf node?
+
+	cur_key_len = bzb_size( catcher, *a_stack, innards->td.leaf.key_off);
+	if ( ( innards->is_leaf) &&
+		 ( key_len == cur_key_len) &&
+		 ( memcmp( key, 
+				bzb_to_asciiz( catcher, *a_stack, innards->td.leaf.key_off),
+				cur_key_len) == 0) )
+		{
+		bzt_put_leaf( catcher, a_stack, innards, key, key_len, val, val_len);
+		return;  // === done ===
+		}  // update value for existing key in leaf node?
+
+	assert( "TODO:  mutate from leaf to interior node..." == NULL);
+	// TODO:  mutate from leaf to interior node...
 
 	// TODO: dereference prev_val
 	// TODO: dereference any old value
 
 	// TODO: trie/tree
 
-	innards->td.leaf.key_off = bzb_from_fixed_mem( catcher, a_stack, key, key_len);
-	innards->td.leaf.val_off = bzb_from_fixed_mem( catcher, a_stack, val, val_len);
 	}  // _________________________________________________________
 
 /**
