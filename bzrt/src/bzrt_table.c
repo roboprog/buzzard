@@ -63,6 +63,10 @@ typedef struct			t_table
 		}				td;				// table data node (union)
 	}					t_table;
 
+/** '\0's from which to create "byte array" */
+static
+size_t					NULL_BYTES[ 256 ];  // assume 0 filled static data
+
 /** Create an empty table (return offset). */
 size_t					bzt_init
 	(
@@ -138,6 +142,7 @@ void					bzt_put_leaf
 	{
 	size_t				prev_val;
 
+	innards->is_leaf = 1;
 	prev_val = innards->td.leaf.val_off;
 
 	// TODO: dereference prev_val
@@ -175,34 +180,59 @@ void					bzt_put
 	{
 	t_table *			innards;
 	size_t				cur_key_len;
+	size_t				new_leaf;
+	t_table *			new_leaf_innards;
+	size_t				next_table_level;
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
-	if ( ( innards->is_leaf) &&
-		 ( innards->td.leaf.key_off == 0) )
+	if ( innards->is_leaf)
 		{
-		bzt_put_leaf( catcher, a_stack, innards, key, key_len, val, val_len);
-		return;  // === done ===
-		}  // empty leaf node?
+		// TODO: refactor bzt_put_leaf, so less duplication, useful for "split" of key
 
-	cur_key_len = bzb_size( catcher, *a_stack, innards->td.leaf.key_off);
-	if ( ( innards->is_leaf) &&
-		 ( key_len == cur_key_len) &&
-		 ( memcmp( key, 
-				bzb_to_asciiz( catcher, *a_stack, innards->td.leaf.key_off),
-				cur_key_len) == 0) )
+		if ( innards->td.leaf.key_off == 0)
+			{
+			bzt_put_leaf( catcher, a_stack, innards, key, key_len, val, val_len);
+			return;  // === done ===
+			}  // empty leaf node?
+
+		cur_key_len = bzb_size( catcher, *a_stack, innards->td.leaf.key_off);
+		if ( ( key_len == cur_key_len) &&
+			 ( memcmp( key, 
+					bzb_to_asciiz( catcher, *a_stack, innards->td.leaf.key_off),
+					cur_key_len) == 0) )
+			{
+			bzt_put_leaf( catcher, a_stack, innards, key, key_len, val, val_len);
+			return;  // === done ===
+			}  // update value for existing key in leaf node?
+
+		new_leaf = bza_cons_stk_frame( catcher, a_stack, sizeof( t_table) );
+		new_leaf_innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
+		bzt_put_leaf( catcher, a_stack, new_leaf_innards,
+			key, key_len,
+			val, val_len);
+
+		assert( "TODO:  mutate from leaf to interior node..." == NULL);
+		// TODO:  mutate from leaf to interior node...
+		// TODO:  dispose of current leaf content
+		// TODO:  use ZERO_BYTES to call bzb_from_fixed_mem()
+		// TODO:  insert indexed offset to new_leaf
+		// TODO:  create another empty leaf for new key
+		// TODO:  shove remainder of new key into 2nd new leaf
+		}  // current level is a leaf?
+	else
 		{
-		bzt_put_leaf( catcher, a_stack, innards, key, key_len, val, val_len);
-		return;  // === done ===
-		}  // update value for existing key in leaf node?
+		assert( "TODO:  descend from interior node..." == NULL);
+		}  // current level is an interior node?
 
-	assert( "TODO:  mutate from leaf to interior node..." == NULL);
-	// TODO:  mutate from leaf to interior node...
 
 	// TODO: dereference prev_val
 	// TODO: dereference any old value
 
 	// TODO: trie/tree
 
+	next_table_level = 0;  // TODO: create / lookup
+	bzt_put( catcher, a_stack, next_table_level,
+			key + 1, key_len - 1, val, val_len);
 	}  // _________________________________________________________
 
 /**
