@@ -65,7 +65,7 @@ typedef struct			t_table
 
 /** '\0's from which to create "byte array" */
 static
-size_t					NULL_BYTES[ 256 ];  // assume 0 filled static data
+size_t					ZERO_BYTES[ 256 ];  // assume 0 filled static data
 
 /** Create an empty table (return offset). */
 size_t					bzt_init
@@ -183,6 +183,10 @@ void					bzt_put
 	size_t				new_leaf;
 	t_table *			new_leaf_innards;
 	size_t				next_table_level;
+	int					cur_byte_idx;
+	size_t *			children;
+
+	// TODO:  make this beautiful, not hideous  :-(
 
 	innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
 	if ( innards->is_leaf)
@@ -208,16 +212,23 @@ void					bzt_put
 		new_leaf = bza_cons_stk_frame( catcher, a_stack, sizeof( t_table) );
 		new_leaf_innards = (t_table *) bza_get_frame_ptr( catcher, *a_stack, table);
 		bzt_put_leaf( catcher, a_stack, new_leaf_innards,
-			key, key_len,
+			key + 1, key_len - 1,
 			val, val_len);
 
-		assert( "TODO:  mutate from leaf to interior node..." == NULL);
-		// TODO:  mutate from leaf to interior node...
-		// TODO:  dispose of current leaf content
-		// TODO:  use ZERO_BYTES to call bzb_from_fixed_mem()
-		// TODO:  insert indexed offset to new_leaf
-		// TODO:  create another empty leaf for new key
-		// TODO:  shove remainder of new key into 2nd new leaf
+		bzb_deref( catcher, *a_stack, innards->td.leaf.key_off);
+		innards->td.leaf.key_off = 0;
+		innards->is_leaf = 0;
+		cur_byte_idx = (int) ( (unsigned char) key[ 0 ]);
+		innards->td.interior.byte_val_nodes = bzb_from_fixed_mem(
+				catcher, a_stack,
+				(char *) ZERO_BYTES,
+				( cur_byte_idx + 1) * sizeof( size_t) );
+		children = (size_t *) bzb_to_asciiz( catcher, *a_stack,
+			innards->td.interior.byte_val_nodes);
+		children[ cur_byte_idx ] = new_leaf;
+
+		assert( "TODO:  create another empty leaf for existing key/val" == NULL);
+		// TODO:  create another empty leaf for existing key/val
 		}  // current level is a leaf?
 	else
 		{
