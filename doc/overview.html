@@ -2,6 +2,45 @@
 <head>
 </head>
 <body>
+
 <h1>Buzzard Internals Overview</h1>
+<p>
+There are currently only 2 modules in the library ready for general use:
+<ul>
+	<li>
+	<a href="#bzrt_alloc">
+	a memory sub-allocation manager that uses a stack data structure as
+	a sub-heap and which supports reference counting;
+	</a>
+	</li>
+	<li>
+	<a href="#bzrt_bytes">
+	a byte-array module which can be used to extract subranges and to
+	merge arrays, as well as be used as a base for (8 bit) strings with
+	an out of band length indicator.
+	</a>
+	</li>
+</ul>
+</p>
+
+<a name="bzrt_alloc"/>
+<h2>
+Memory Allocation
+</h2>
+<p>
+This module is currently specified and implemented in
+bzrt_alloc.h and bzrt_alloc.c, respectively...
+</p>
+
+<a name="bzrt_bytes"/>
+<h2>
+<h2>
+Byte Array Management
+</h2>
+<p>
+This module is currently specified and implemented in
+bzrt_bytes.h and bzrt_bytes.c, respectively...
+</p>
+
 </body>
 </html>
