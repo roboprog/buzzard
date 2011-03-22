@@ -29,8 +29,44 @@ Memory Allocation
 </h2>
 <p>
 This module is currently specified and implemented in
-bzrt_alloc.h and bzrt_alloc.c, respectively...
+<a href="../bzrt/src/bzrt_alloc.h">bzrt_alloc.h</a>
+and
+<a href="../bzrt/src/bzrt_alloc.c">bzrt_alloc.c</a>,
+respectively.
 </p>
+<p>
+The motivation behind this module is to provide a memory allocation 
+mechanism that packs memory together, to some extent, for a task or thread.
+Ideally, the lifetime of this sub-heap will be somewhat short,
+and any needed return value(s) can be extracted before the sub-heap
+is deallocated entirely.
+These sub-heaps can be relocated (or not, depending on initialization),
+so it is important to use the offset references when dealing with
+a memory region within the sub-heap,
+and not to retain a pointer for long term use.
+As of this writing (March 2011), such relocations only occur
+when more space is needed,
+and the sub-heap as a whole is reallocated into a larger memory area.
+</p>
+<p>
+Functions:
+</p>
+<table width="90%">
+<tr>
+<th width="30%">Name</th>
+<th width="70%">Notes</th>
+</tr>
+<tr>
+<td>
+<code>
+bza_cons_stack( catcher)
+</code>
+</td>
+	<td>
+	Used to construct a variable size, relocatable sub-heap
+	</td>
+</tr>
+</table>
 
 <a name="bzrt_bytes"/>
 <h2>
