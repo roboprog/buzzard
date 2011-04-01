@@ -53,17 +53,102 @@ Functions:
 </p>
 <table width="90%">
 <tr>
-<th width="30%">Name</th>
-<th width="70%">Notes</th>
+<th width="50%">Name</th>
+<th width="50%">Notes</th>
 </tr>
 <tr>
-<td>
+	<td>
 <code>
 bza_cons_stack( catcher)
 </code>
-</td>
+	</td>
 	<td>
-	Used to construct a variable size, relocatable sub-heap
+	Construct a variable size, relocatable sub-heap
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bza_cons_stack_rt( catcher, initial_size, is_fixed)
+</code>
+	</td>
+	<td>
+	Construct a fixed size, immovable sub-heap.
+	Possibly useful for real-time operations,
+	as sub-allocation will happen in a short, consistant, time.
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bza_dest_stack( catcher, a_stack)
+</code>
+	</td>
+	<td>
+	Destroy (free) the sub-heap and all of its contents.
+	Note that this only recovers the memory:
+	there will be another wrapper module later to automatically
+	call destructors which may perform other non-memory related
+	clean up code.
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bza_cons_stk_frame( catcher, a_stack, frame_sz)
+</code>
+	</td>
+	<td>
+	Construct a frame for a reference-counted sub-allocation.
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bza_ref_stk_frame( catcher, a_stack, stk_frame_off)
+</code>
+	</td>
+	<td>
+	Increment the reference-count for a sub-allocation.
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bza_deref_stk_frame( catcher, a_stack, stk_frame_off)
+</code>
+	</td>
+	<td>
+	Decrement the reference-count for a sub-allocation.
+	The sub-allocation will be discarded when the reference count
+	falls to 0, of course.
+	Note that this only recovers the memory:
+	there will be another wrapper module later to automatically
+	call a destructor which may perform other non-memory related
+	clean up code.
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bza_get_ref_count( catcher, a_stack, stk_frame_off)
+</code>
+	</td>
+	<td>
+	Return the reference count of the indicated sub-allocated frame.
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bza_get_frame_ptr( catcher, a_stack, stk_frame_off)
+</code>
+	</td>
+	<td>
+	Return the pointer to the payload memory within the sub-allocated
+	frame.
+	WARNING:  this pointer will only be valid until the sub-heap
+	is relocated, or until deallocating the frame or entire sub-heap!
 	</td>
 </tr>
 </table>
