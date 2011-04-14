@@ -22,6 +22,9 @@ There are currently only 2 modules in the library ready for general use:
 	</li>
 </ul>
 </p>
+<p>
+See <code>test/src/main.c</code> for example usage of these modules.
+</p>
 
 <a name="bzrt_alloc"/>
 <h2>
@@ -162,6 +165,99 @@ Byte Array Management
 This module is currently specified and implemented in
 bzrt_bytes.h and bzrt_bytes.c, respectively...
 </p>
+
+<table>
+<tr>
+	<td>
+<code>
+bzb_from_asciiz( catcher, a_stack, src)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_from_fixed_mem( catcher, a_stack, val, val_len)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_init_size( catcher, a_stack, size)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_subarray( catcher, a_stack, src, from, len)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_concat( catcher, a_stack, srcs)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_concat_to( catcher, a_stack, dst, src)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_ref( catcher, a_stack, bytes)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_deref( catcher, a_stack, bytes)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_size( catcher, a_stack, bytes)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+<tr>
+	<td>
+<code>
+bzb_to_asciiz( catcher, a_stack, bytes)
+</code>
+	</td>
+	<td>
+	</td>
+</tr>
+</table>
 
 </body>
 </html>
