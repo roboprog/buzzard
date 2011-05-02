@@ -166,7 +166,11 @@ This module is currently specified and implemented in
 bzrt_bytes.h and bzrt_bytes.c, respectively...
 </p>
 
-<table>
+<table width="90%">
+<tr>
+<th width="50%">Name</th>
+<th width="50%">Notes</th>
+</tr>
 <tr>
 	<td>
 <code>
@@ -174,6 +178,7 @@ bzb_from_asciiz( catcher, a_stack, src)
 </code>
 	</td>
 	<td>
+	Construct a byte array from an ASCIIZ (0 byte terminated C style) string.
 	</td>
 </tr>
 <tr>
@@ -183,6 +188,7 @@ bzb_from_fixed_mem( catcher, a_stack, val, val_len)
 </code>
 	</td>
 	<td>
+	Construct a byte array from a given address and size memory block.
 	</td>
 </tr>
 <tr>
@@ -192,6 +198,7 @@ bzb_init_size( catcher, a_stack, size)
 </code>
 	</td>
 	<td>
+	Construct a byte array with the given capacity, but 0 bytes in use.
 	</td>
 </tr>
 <tr>
@@ -201,6 +208,11 @@ bzb_subarray( catcher, a_stack, src, from, len)
 </code>
 	</td>
 	<td>
+	Construct a byte array from the given subrange of another byte array.
+	If <i>len</i> is less than 0,
+		then take the remainder of the input.
+	If <i>from</i> is less than 0,
+		then take the final <i>len</i> bytes of the input.
 	</td>
 </tr>
 <tr>
@@ -210,6 +222,7 @@ bzb_concat( catcher, a_stack, srcs)
 </code>
 	</td>
 	<td>
+	Construct a byte array by concatenating an array of byte arrays.
 	</td>
 </tr>
 <tr>
@@ -219,6 +232,9 @@ bzb_concat_to( catcher, a_stack, dst, src)
 </code>
 	</td>
 	<td>
+	Append the input byte array to the given byte array,
+	constructing a new byte array buffer if there is not enough capacity.
+	TODO:  discuss reference counting strategy.
 	</td>
 </tr>
 <tr>
@@ -228,6 +244,7 @@ bzb_ref( catcher, a_stack, bytes)
 </code>
 	</td>
 	<td>
+	Increment the reference count of the byte array.
 	</td>
 </tr>
 <tr>
@@ -237,6 +254,13 @@ bzb_deref( catcher, a_stack, bytes)
 </code>
 	</td>
 	<td>
+	Decrement the reference count of the byte array.
+	The byte array will be discarded when the reference count
+	falls to 0, of course.
+	Note that this only recovers the memory:
+	there will be another wrapper module later to automatically
+	call a destructor which may perform other non-memory related
+	clean up code.
 	</td>
 </tr>
 <tr>
@@ -246,6 +270,8 @@ bzb_size( catcher, a_stack, bytes)
 </code>
 	</td>
 	<td>
+	Return the number of meaningful, defined bytes in the byte array
+	(as opposed to the total capacity).
 	</td>
 </tr>
 <tr>
@@ -255,6 +281,9 @@ bzb_to_asciiz( catcher, a_stack, bytes)
 </code>
 	</td>
 	<td>
+	Return a pointer to the first data byte in the byte array.
+	This might well be an ASCIIZ (0 byte terminated C style) string.
+	If not, use bzb_size() to determine the meaningful length of the data.
 	</td>
 </tr>
 </table>
